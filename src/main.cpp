@@ -16,6 +16,7 @@ using namespace utils;
 namespace po = boost::program_options;
 
 int main(int argc, char **argv) {
+	string programName = "arch-linux-installer";
 	string programPath = string(argv[0]);
 
 	po::options_description genOptions("General options");
@@ -68,7 +69,7 @@ int main(int argc, char **argv) {
 
 	if(argc == 1 || args["help"].as<bool>())
 	{
-		cout << "Usage: arch-linux-installer [options]" << endl;
+		cout << "Usage: " + programName + " [options]" << endl;
 		cout << cmdOptions << endl;
 		return 0;
 	}
@@ -238,15 +239,15 @@ int main(int argc, char **argv) {
 		SystemUtils::csystem("genfstab -U -p /mnt >> /mnt/etc/fstab");
 
 		cout << "Chroot new installation..." << endl;
-		SystemUtils::csystem("cp " + programPath + " /mnt/root/arch-installer");
+		SystemUtils::csystem("cp " + programPath + " /mnt/root/" + programName);
 		if(args.count("config"))
 		{
-			SystemUtils::csystem("cp " + configPath + " /mnt/root/arch-installer.conf");
+			SystemUtils::csystem("cp " + configPath + " /mnt/root/" + programName + ".conf");
 		}
 
-		SystemUtils::csystem("arch-chroot /mnt /root/arch-installer -c /root/arch-installer.conf --chrooted");
+		SystemUtils::csystem("arch-chroot /mnt /root/" + programName + " -c /root/" + programName + ".conf --chrooted");
 
-		SystemUtils::csystem("rm /mnt/root/arch-installer /mnt/root/arch-installer.conf");
+		SystemUtils::csystem("rm /mnt/root/" + programName + " /mnt/root/" + programName + ".conf");
 
 		SystemUtils::csystem("umount -R /mnt");
 		SystemUtils::csystem("reboot");
