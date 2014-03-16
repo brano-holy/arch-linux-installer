@@ -6,14 +6,26 @@ arch-linux-installer
 *Installer for Arch Linux using config file.*
 
 `arch-linux-installer` installs clean and minimal Arch Linux installation 
-on whole disk. 
-It supports BIOS/EFI and encrypted LVM.
+on whole disk. It supports BIOS/EFI and encrypted LVM.
 
 Download
 --------
 You can download source code and build `arch-linux-installer` according to build 
-instruction below or download binaries from [Release](https://github.com/brano-holy/arch-linux-installer/releases) 
+instruction below or download binaries from [Releases](https://github.com/brano-holy/arch-linux-installer/releases) 
 page.
+
+Usage
+-----
+1. Boot Arch Linux installation [image](https://www.archlinux.org/download/) (you 
+can use [arch-linux-usb-creator](https://github.com/brano-holy/arch-linux-usb-creator) 
+to create bootable USB.
+
+2. Download binary from [Releases](https://github.com/brano-holy/arch-linux-installer/releases) 
+page or build and download your own binary.
+
+3. Edit config file as you preffer.
+
+4. Run `./arch-linux-installer -c path/to/config.conf`
 
 Dependencies
 ------------
