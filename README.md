@@ -26,9 +26,9 @@ page or build and download your own binary.
 3. Edit config file as you preffer.
 
 4. Run
-`bash
+```bash
 $ ./arch-linux-installer -c path/to/config.conf
-`
+```
 
 Dependencies
 ------------
