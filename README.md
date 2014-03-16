@@ -37,6 +37,6 @@ $ cmake --build .
 
 Config syntax
 -------------
-Config files are using INI-like syntax (see examples).
+Config files are using INI-like syntax (see [examples](https://github.com/brano-holy/arch-linux-installer/tree/master/examples)).
 
 To show all possible options, simply run `./arch-linux-installer` without options.
