@@ -12,6 +12,8 @@ It supports BIOS/EFI and encrypted LVM.
 Building 
 --------
 
-`$ mkdir build && cd build`
-`$ cmake ..`
-`$ cmake --build .`
+```bash
+$ mkdir build && cd build
+$ cmake ..
+$ cmake --build .
+```
