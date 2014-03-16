@@ -25,5 +25,6 @@ $ cmake --build .
 
 Config syntax
 -------------
-Config files are using INI-like syntax (see examples). To show all possible 
-options, simply run `./arch-linux-installer` without options.
+Config files are using INI-like syntax (see examples).
+
+To show all possible options, simply run `./arch-linux-installer` without options.
