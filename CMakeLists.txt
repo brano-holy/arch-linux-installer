@@ -12,8 +12,6 @@ link_directories(${Boost_LIBRARY_DIR})
 file(GLOB ALI_SRC_CPP src/*.cpp src/configuration/*.cpp src/utils/*.cpp)
 add_executable(arch-linux-installer ${ALI_SRC_CPP})
 
-install(TARGETS arch-linux-installer RUNTIME DESTINATION bin)
-
 add_subdirectory(src)
 
 target_link_libraries(arch-linux-installer ${Boost_LIBRARIES})
