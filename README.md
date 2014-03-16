@@ -9,9 +9,20 @@ arch-linux-installer
 on whole disk. 
 It supports BIOS/EFI and encrypted LVM.
 
+Download
+--------
+You can download source code and build `arch-linux-installer` according to build 
+instruction below or download binaries from [Release](https://github.com/brano-holy/arch-linux-installer/releases) 
+page.
+
 Dependencies
 ------------
-`arch-linux-installer` is using Boost.Program_options library (version 1.53 
+There are no dependencies for running binary release (all libraries are linked 
+staticly).
+
+`arch-linux-installer` is using:
+
+* Boost.Program_options library (version 1.53 
 or newer) - [http://www.boost.org/doc/libs/1\_53\_0/doc/html/program\_options.html](http://www.boost.org/doc/libs/1_53_0/doc/html/program_options.html).
 
 Building
