@@ -18,7 +18,7 @@ page.
 Dependencies
 ------------
 There are no dependencies for running binary release (all libraries are linked 
-staticly).
+staticly). Dependencies are necessary only for building.
 
 `arch-linux-installer` is using:
 
