@@ -23,14 +23,17 @@ to create bootable USB.
 2. Download binary from [Releases](https://github.com/brano-holy/arch-linux-installer/releases) 
 page or build and download your own binary.
 
-3. Edit config file as you need (you may ommit this step if you specify all 
-options as command line arguments).
+3. Edit config file as you need (you may ommit this step if you specify options 
+as command line arguments).
 
-4. Run `arch-linux-installer` with your config (or with command line arguments).
+4. Run `arch-linux-installer`.
+
+With config file:
 ```bash
 $ ./arch-linux-installer -c path/to/config.conf
 ```
 
+Or with command line arguments:
 ```bash
 $. /arch-linux-installer --disk-device /dev/sda --locales "en_US.UTF-8 UTF-8" --lang en\_US --hostname my-arch --timezone Europe/Prague
 ```
