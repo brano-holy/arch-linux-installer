@@ -23,7 +23,7 @@ to create bootable USB).
 2. Download binary from [Releases](https://github.com/brano-holy/arch-linux-installer/releases) 
 page or build and download your own binary.
 
-3. Edit config file as you need (you may ommit this step if you specify options 
+3. Edit config file as you need (you may omit this step if you specify options 
 as command line arguments).
 
 4. Run `arch-linux-installer`.
@@ -41,7 +41,7 @@ $ ./arch-linux-installer --disk-device /dev/sda --locales "en_US.UTF-8 UTF-8" --
 Dependencies
 ------------
 There are no dependencies for running binary release (all libraries are linked 
-staticly). Dependencies are necessary only for building.
+statically). Dependencies are necessary only for building.
 
 `arch-linux-installer` is using:
 
