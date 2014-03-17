@@ -18,7 +18,7 @@ Usage
 -----
 1. Boot Arch Linux installation [image](https://www.archlinux.org/download/) (you 
 can use [arch-linux-usb-creator](https://github.com/brano-holy/arch-linux-usb-creator) 
-to create bootable USB.
+to create bootable USB).
 
 2. Download binary from [Releases](https://github.com/brano-holy/arch-linux-installer/releases) 
 page or build and download your own binary.
@@ -35,7 +35,7 @@ $ ./arch-linux-installer -c path/to/config.conf
 
 Or with command line arguments:
 ```bash
-$. /arch-linux-installer --disk-device /dev/sda --locales "en_US.UTF-8 UTF-8" --lang en\_US --hostname my-arch --timezone Europe/Prague
+$ ./arch-linux-installer --disk-device /dev/sda --locales "en_US.UTF-8 UTF-8" --lang en\_US --hostname my-arch --timezone Europe/Prague
 ```
 
 Dependencies
@@ -62,4 +62,4 @@ Config syntax
 -------------
 Config files are using INI-like syntax (see [examples](https://github.com/brano-holy/arch-linux-installer/tree/master/examples)).
 
-To show all possible options, simply run `$ ./arch-linux-installer` without options.
+To show all possible options, simply run `arch-linux-installer` without options.
