@@ -35,7 +35,7 @@ $ ./arch-linux-installer -c path/to/config.conf
 
 Or with command line arguments:
 ```bash
-$ ./arch-linux-installer --disk-device /dev/sda --locales "en_US.UTF-8 UTF-8" --lang en\_US --hostname my-arch --timezone Europe/Prague
+$ ./arch-linux-installer --disk-device /dev/sda --locales "en_US.UTF-8 UTF-8" --lang en_US --hostname my-arch --timezone Europe/Prague
 ```
 
 Dependencies
