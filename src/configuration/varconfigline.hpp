@@ -19,32 +19,31 @@
  *
  */
 
-#ifndef VARCONFIGLINE_H
-#define VARCONFIGLINE_H
+#ifndef CONFIGURATION_VARCONFIGLINE_HPP
+#define CONFIGURATION_VARCONFIGLINE_HPP
 
 #include "configline.hpp"
 #include "commentconfigline.hpp"
 
-namespace configuration
-{
+namespace configuration {
 	class VarConfigLine : public CommentConfigLine
 	{
 	protected:
-		string name;
-		string value;
+		std::string name;
+		std::string value;
 
 	public:
 		VarConfigLine();
-		VarConfigLine(const string& name);
+		VarConfigLine(const std::string& name);
 
-		virtual void parseLine(const string& line);
-		virtual string writeToLine();
+		virtual void parseLine(const std::string& line);
+		virtual std::string writeToLine();
 
-		string getName();
+		std::string getName();
 
-		string getValue();
-		void setValue(string value);
+		std::string getValue();
+		void setValue(std::string value);
 	};
 }
 
-#endif // VARCONFIGLINE_H
+#endif // CONFIGURATION_VARCONFIGLINE_HPP

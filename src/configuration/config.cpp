@@ -30,8 +30,9 @@
 #include "../utils/stringutils.hpp"
 #include "../utils/memutils.hpp"
 
-using namespace configuration;
+using namespace std;
 using namespace utils;
+using namespace configuration;
 
 Config::Config()
 {

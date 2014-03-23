@@ -28,11 +28,11 @@ namespace configuration {
 	class TextConfigLine : public ConfigLine
 	{
 	protected:
-		string line;
+		std::string line;
 
 	public:
-		virtual void parseLine(const string& line);
-		virtual string writeToLine();
+		virtual void parseLine(const std::string& line);
+		virtual std::string writeToLine();
 	};
 }
 

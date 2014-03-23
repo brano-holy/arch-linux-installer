@@ -19,26 +19,23 @@
  *
  */
 
-#ifndef MEMUTILS_H
-#define MEMUTILS_H
+#ifndef UTILS_MEMUTILS_HPP
+#define UTILS_MEMUTILS_HPP
 
 #include <vector>
 
-using namespace std;
-
-namespace utils
-{
+namespace utils {
 	class MemUtils
 	{
 		public:
 			template<typename T>
-			static void deleteVector(const vector<T>& data);
+			static void deleteVector(const std::vector<T>& data);
 	};
 
 	template<typename T>
-	void MemUtils::deleteVector(const vector<T>& data)
+	void MemUtils::deleteVector(const std::vector<T>& data)
 	{
-		typedef typename vector<T>::size_type vector_size_type;
+		typedef typename std::vector<T>::size_type vector_size_type;
 
 		for(vector_size_type i = 0; i < data.size(); i++)
 		{
@@ -47,4 +44,4 @@ namespace utils
 	}
 }
 
-#endif // MEMUTILS_H
+#endif // UTILS_MEMUTILS_HPP

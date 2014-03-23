@@ -23,6 +23,7 @@
 
 #include <sstream>
 
+using namespace std;
 using namespace utils;
 
 bool StringUtils::startsWith(const string& str, const string& prefix)

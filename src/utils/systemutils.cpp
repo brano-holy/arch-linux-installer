@@ -25,6 +25,7 @@
 #include <iostream>
 #include <sstream>
 
+using namespace std;
 using namespace utils;
 
 int SystemUtils::csystem(string cmd)

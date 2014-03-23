@@ -24,19 +24,16 @@
 
 #include <string>
 
-using namespace std;
-
-namespace utils
-{
+namespace utils {
 	class SystemUtils
 	{
 	public:
-		static int csystem(string cmd);
-		static string ssystem(string cmd, int bufferSize = 256);
+		static int csystem(std::string cmd);
+		static std::string ssystem(std::string cmd, int bufferSize = 256);
 
 		static int getRAMSize(char &unit);
 		static int alignSize(int minSize, int aligment = 2048);
 	};
 }
 
-#endif // UTILS_SYSTEMUTILS_H
+#endif // UTILS_SYSTEMUTILS_HPP

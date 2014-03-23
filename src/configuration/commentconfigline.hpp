@@ -19,30 +19,29 @@
  *
  */
 
-#ifndef TEXTCONFIGLINE_H
-#define TEXTCONFIGLINE_H
+#ifndef CONFIGURATION_COMMENTCONFIGLINE_HPP
+#define CONFIGURATION_COMMENTCONFIGLINE_HPP
 
 #include "configline.hpp"
 
-namespace configuration
-{
+namespace configuration {
 	class CommentConfigLine : public ConfigLine
 	{
 	private:
 		bool hasComment;
-		string comment;
+		std::string comment;
 
 	public:
 		CommentConfigLine();
 
-		virtual void parseLine(const string& line);
-		virtual string writeToLine();
+		virtual void parseLine(const std::string& line);
+		virtual std::string writeToLine();
 
-		string getComment() const;
-		void setComment(const string& comment);
+		std::string getComment() const;
+		void setComment(const std::string& comment);
 		void removeComment();
 
 	};
 }
 
-#endif // TEXTCONFIGLINE_H
+#endif // CONFIGURATION_TEXTCONFIGLINE_HPP

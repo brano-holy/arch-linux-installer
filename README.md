@@ -58,6 +58,12 @@ $ cmake ..
 $ cmake --build .
 ```
 
+For faster build on multicore processor, you can use:
+
+```bash
+$ cmake --build . -- -j4
+```
+
 Config syntax
 -------------
 Config files are using INI-like syntax (see [examples](https://github.com/brano-holy/arch-linux-installer/tree/master/examples)).

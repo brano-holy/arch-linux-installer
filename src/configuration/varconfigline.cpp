@@ -23,8 +23,9 @@
 
 #include "../utils/stringutils.hpp"
 
-using namespace configuration;
+using namespace std;
 using namespace utils;
+using namespace configuration;
 
 VarConfigLine::VarConfigLine()
 {

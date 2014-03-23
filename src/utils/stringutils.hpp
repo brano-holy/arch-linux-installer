@@ -19,24 +19,21 @@
  *
  */
 
-#ifndef STRINGUTILS_H
-#define STRINGUTILS_H
+#ifndef UTILS_STRINGUTILS_HPP
+#define UTILS_STRINGUTILS_HPP
 
 #include <string>
 #include <vector>
 
-using namespace std;
-
-namespace utils
-{
+namespace utils {
 	class StringUtils
 	{
 		public:
-			static bool startsWith(const string& str, const string& prefix);
-			static vector<string> split(const string& str, char delim);
-			static string join(char glue, const vector<string>& values);
-			static string trim(const string& str);
+			static bool startsWith(const std::string& str, const std::string& prefix);
+			static std::vector<std::string> split(const std::string& str, char delim);
+			static std::string join(char glue, const std::vector<std::string>& values);
+			static std::string trim(const std::string& str);
 	};
 }
 
-#endif // STRINGUTILS_H
+#endif // UTILS_STRINGUTILS_HPP

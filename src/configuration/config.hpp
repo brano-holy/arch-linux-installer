@@ -19,46 +19,44 @@
  *
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef CONFIGURATION_CONFIG_HPP
+#define CONFIGURATION_CONFIG_HPP
 
 #include <vector>
 #include <string>
+
 #include "configline.hpp"
 #include "varconfigline.hpp"
 
-using namespace std;
-
-namespace configuration
-{
+namespace configuration {
 	class Config
 	{
 		private:
-			string path;
+			std::string path;
 
-			vector<ConfigLine*> content;
-			vector<VarConfigLine*> varContent;
+			std::vector<ConfigLine*> content;
+			std::vector<VarConfigLine*> varContent;
 
 		public:
 			Config();
-			Config(string configPath);
+			Config(std::string configPath);
 
 			~Config();
 
-			bool load(string configPath);
+			bool load(std::string configPath);
 			bool save();
-			bool save(string configPath);
+			bool save(std::string configPath);
 
-			string getValue(string name);
-			void setValue(string name, string value);
-			void addValue(string name, string value);
-			void addValue(string name, string value, string comment);
+			std::string getValue(std::string name);
+			void setValue(std::string name, std::string value);
+			void addValue(std::string name, std::string value);
+			void addValue(std::string name, std::string value, std::string comment);
 
-			vector<string> getValues(string name);
-			void setValues(string name, vector<string> values);
-			void addValues(string name, vector<string> values);
-			void addValues(string name, vector<string> values, string comment);
+			std::vector<std::string> getValues(std::string name);
+			void setValues(std::string name, std::vector<std::string> values);
+			void addValues(std::string name, std::vector<std::string> values);
+			void addValues(std::string name, std::vector<std::string> values, std::string comment);
 	};
 }
 
-#endif // CONFIG_H
+#endif // CONFIGURATION_CONFIG_HPP

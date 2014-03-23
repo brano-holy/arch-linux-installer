@@ -21,6 +21,7 @@
 
 #include "textconfigline.hpp"
 
+using namespace std;
 using namespace configuration;
 
 void TextConfigLine::parseLine(const string& line)

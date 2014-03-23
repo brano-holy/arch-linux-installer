@@ -19,22 +19,19 @@
  *
  */
 
-#ifndef CONFIGLINE_H
-#define CONFIGLINE_H
+#ifndef CONFIGURATION_CONFIGLINE_HPP
+#define CONFIGURATION_CONFIGLINE_HPP
 
 #include <string>
 
-using namespace std;
-
-namespace configuration
-{
+namespace configuration {
 	class ConfigLine
 	{
 	public:
-		virtual void parseLine(const string& line) = 0;
-		virtual string writeToLine() = 0;
+		virtual void parseLine(const std::string& line) = 0;
+		virtual std::string writeToLine() = 0;
 
 	};
 }
 
-#endif // CONFIGLINE_H
+#endif // CONFIGURATION_CONFIGLINE_HPP

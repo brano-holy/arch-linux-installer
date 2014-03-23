@@ -27,7 +27,7 @@
 
 #include <boost/program_options.hpp>
 
-#include "configuration/config.hpp"
+#include "configuration.hpp"
 #include "utils.hpp"
 
 using namespace std;
