@@ -1,0 +1,5 @@
+build/
+releases/
+.kdev4/
+
+*.kdev4
