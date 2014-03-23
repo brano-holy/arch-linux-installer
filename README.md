@@ -3,7 +3,7 @@ Arch Linux Installer
 
 arch-linux-installer
 --------------------
-*Installer for Arch Linux using config file.*
+*Unofficial installer for Arch Linux using config file.*
 
 `arch-linux-installer` installs clean and minimal Arch Linux installation 
 on whole disk. It supports BIOS/EFI and encrypted LVM.
@@ -63,3 +63,9 @@ Config syntax
 Config files are using INI-like syntax (see [examples](https://github.com/brano-holy/arch-linux-installer/tree/master/examples)).
 
 To show all possible options, simply run `arch-linux-installer` without options.
+
+License
+-------
+Arch Linux Installer is licensed under GNU GPL v3 (see 
+[COPYING](https://github.com/brano-holy/arch-linux-installer/blob/master/COPYING) 
+file).
