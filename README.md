@@ -64,6 +64,8 @@ For faster build on multicore processor, you can use:
 $ cmake --build . -- -j4
 ```
 
+Where option `-j4` means you want to use 4 cores for building.
+
 Config syntax
 -------------
 Config files are using INI-like syntax (see [examples](https://github.com/brano-holy/arch-linux-installer/tree/master/examples)).
