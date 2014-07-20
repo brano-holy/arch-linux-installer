@@ -271,6 +271,10 @@ int main(int argc, char **argv) {
 		SystemUtils::csystem("rm /mnt/root/" + programName + " /mnt/root/" + programName + ".conf");
 
 		SystemUtils::csystem("umount -R /mnt");
+		
+		string tmpReboot;
+		cout << "Installation has finished. Press any Enter to reboot..." << endl;
+		cin >> tmpReboot;
 		SystemUtils::csystem("reboot");
 	}
 	else
