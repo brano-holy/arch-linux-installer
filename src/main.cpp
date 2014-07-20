@@ -36,7 +36,10 @@ using namespace utils;
 
 namespace po = boost::program_options;
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
+	cout.setf(ios_base::boolalpha);
+
 	string programName = "arch-linux-installer";
 	string programPath = string(argv[0]);
 
@@ -44,7 +47,6 @@ int main(int argc, char **argv) {
 	genOptions.add_options()
 		("config,c", po::value<string>()->value_name("<path>"), "Specify path to config file.")
 		("disk-device", po::value<string>()->value_name("<device>")->required(), "Specify disk device, where will be Arch Linux installed.")
-		("efi", po::bool_switch(), "Use EFI.")
 		("swap-size", po::value<double>()->value_name("<percent>")->default_value(1.05), "Specify size of swap partition according to RAM size (eg.: 1.05 means 105% of RAM size).")
 		("erase-disk", po::bool_switch(), "Erase whole disk before installation (write zeros).")
 		("help,h", po::bool_switch(), "Print this help.")
@@ -71,6 +73,9 @@ int main(int argc, char **argv) {
 	hiddenOptions.add_options()
 		("chrooted", po::bool_switch(), "This option is added, when installer is running in newly installed system.")
 	;
+	
+	po::positional_options_description positionalOptions;
+	positionalOptions.add("config", -1);
 
 	po::options_description cmdOptions;
 	cmdOptions.
@@ -84,13 +89,16 @@ int main(int argc, char **argv) {
 		add(cmdOptions).
 		add(hiddenOptions)
 	;
+	
+	po::command_line_parser argParser(argc, argv);
+	argParser.options(allOptions).positional(positionalOptions);
 
 	po::variables_map args;
-	po::store(po::parse_command_line(argc, argv, allOptions), args);
+	po::store(argParser.run(), args);
 
 	if(argc == 1 || args["help"].as<bool>())
 	{
-		cout << "Usage: " + programName + " [options]" << endl;
+		cout << "Usage: " << programName << " [options] [config-path]" << endl;
 		cout << cmdOptions << endl;
 		return 0;
 	}
@@ -115,6 +123,7 @@ int main(int argc, char **argv) {
 	po::notify(args);
 
 	// ############################################
+	bool efi = (SystemUtils::csystem("efivar -l > /dev/null 2>&1") == 0);
 	string lvmPartition = args["disk-device"].as<string>() + "3";
 
 	// ############################################
@@ -139,31 +148,31 @@ int main(int argc, char **argv) {
 		}
 
 		// ############################################
-		string efiPartition;
-		string biosPartition;
+		string efiBiosPartition;
 
 		cout << "Creating partitions (+FS) for ";
-		if(args["efi"].as<bool>())
+		if(efi)
 		{
 			cout << "EFI mode..." << endl;
 
-			efiPartition = args["disk-device"].as<string>() + "1";
-			cout << "Creating EFI partition (" + efiPartition + ")..." << endl;
+			efiBiosPartition = args["disk-device"].as<string>() + "1";
+			cout << "Creating EFI partition (" << efiBiosPartition << ")..." << endl;
 			SystemUtils::csystem("sgdisk -n 1:0:+100M -t 1:EF00 " + args["disk-device"].as<string>());
 
-			cout << "Creating FS for EFI partition (" + efiPartition + ")..." << endl;
-			SystemUtils::csystem("mkfs.fat " + efiPartition);
+			cout << "Creating FS for EFI partition (" << efiBiosPartition << ")..." << endl;
+			SystemUtils::csystem("mkfs.fat " + efiBiosPartition);
 		}
 		else
 		{
 			cout << "BIOS mode..." << endl;
 
-			biosPartition = args["disk-device"].as<string>() + "1";
-			cout << "Creating BIOS partition (" + biosPartition + ")..." << endl;
+			efiBiosPartition = args["disk-device"].as<string>() + "1";
+			cout << "Creating BIOS partition (" << efiBiosPartition << ")..." << endl;
 			SystemUtils::csystem("sgdisk -n 1:0:+2M -t 1:EF02 " + args["disk-device"].as<string>());
 		}
 
 		// ############################################
+		string swapPartition, rootPartition, bootPartition;
 		char ramSizeUnit;
 		int ramSize = SystemUtils::getRAMSize(ramSizeUnit);
 		char swapSizeUnit = ramSizeUnit;
@@ -174,87 +183,76 @@ int main(int argc, char **argv) {
 		{
 			cout << "boot and encrypted LVM (root and swap)..." << endl;
 
-			string bootPartition = args["disk-device"].as<string>() + "2";
-			cout << "Creating boot partition (" + bootPartition + ")..." << endl;
+			bootPartition = args["disk-device"].as<string>() + "2";
+			cout << "Creating boot partition (" << bootPartition << ")..." << endl;
 			SystemUtils::csystem("sgdisk -n 2:0:+300M -t 2:8300 " + args["disk-device"].as<string>());
-			cout << "Creating FS for boot partition (" + bootPartition + ")..." << endl;
+			cout << "Creating FS for boot partition (" << bootPartition << ")..." << endl;
 			SystemUtils::csystem("mkfs.ext2 " + bootPartition);
 
-			cout << "Creating root LVM partition (" + lvmPartition + ")..." << endl;
+			cout << "Creating root LVM partition (" << lvmPartition << ")..." << endl;
 			SystemUtils::csystem("sgdisk -n 3:0:0 -t 3:8E00 " + args["disk-device"].as<string>());
 
 			string diskMapperCrypt = lvmPartition.substr(lvmPartition.find_last_of("/") + 1) + "_crypt";
-			cout << "Setting up encryption (" + diskMapperCrypt + ")..." << endl;
+			cout << "Setting up encryption (" << diskMapperCrypt << ")..." << endl;
 
-			cout << fixed << setprecision(2) << "Please wait few seconds to generate the key after pressing enter..." << endl;
+			cout << "Please wait few seconds to generate the key after pressing enter..." << endl;
 			cout << "Keyboard layout: " << args["keyboard"].as<string>() << endl;
 			SystemUtils::csystem("cryptsetup -y -q -i " + to_string(args["enc-iters"].as<int>()) + " -h sha512 -s 512 luksFormat " + lvmPartition);
 			SystemUtils::csystem("cryptsetup open --type luks " + lvmPartition + " " + diskMapperCrypt);
 
-			cout << "Creating root and swap logical volumes (RAM: " << ramSize << ramSizeUnit << ", SWAP: " << swapSize << swapSizeUnit << ")..." << endl;
 			SystemUtils::csystem("pvcreate /dev/mapper/" + diskMapperCrypt);
 			SystemUtils::csystem("vgcreate " + args["lvm-vg-name"].as<string>() + " /dev/mapper/" + diskMapperCrypt);
+
+			swapPartition = "/dev/" + args["lvm-vg-name"].as<string>() + "/swap";
+			cout << "Creating swap volume (" << swapPartition << ", RAM: " << ramSize << ramSizeUnit << ", SWAP: " << swapSize << swapSizeUnit << ")..." << endl;
 			SystemUtils::csystem("lvcreate -L " + to_string(swapSize) + swapSizeUnit + " " + args["lvm-vg-name"].as<string>() + " -n swap");
+			
+			rootPartition = "/dev/" + args["lvm-vg-name"].as<string>() + "/root";
+			cout << "Creating root volume (" << rootPartition << ")..." << endl;
 			SystemUtils::csystem("lvcreate -l 100%FREE " + args["lvm-vg-name"].as<string>() + " -n root");
-
-			string swapVolume = "/dev/" + args["lvm-vg-name"].as<string>() + "/swap";
-			cout << "Creating FS for swap volume (" + swapVolume + ")..." << endl;
-			SystemUtils::csystem("mkswap " + swapVolume);
-
-			string rootVolume = "/dev/" + args["lvm-vg-name"].as<string>() + "/root";
-			cout << "Creating FS for root volume (" + rootVolume + ")..." << endl;
-			SystemUtils::csystem("mkfs.ext4 " + rootVolume);
-
-			cout << "Mounting root volume (" + rootVolume + " => /mnt)..." << endl;
-			SystemUtils::csystem("mount " + rootVolume + " /mnt");
-
-			cout << "Mounting boot partition (" + bootPartition + " => /mnt/boot)..." << endl;
-			SystemUtils::csystem("mkdir /mnt/boot");
-			SystemUtils::csystem("mount " + args["disk-device"].as<string>() + "2 /mnt/boot");
-
-			if(args["efi"].as<bool>())
-			{
-				cout << "Mounting EFI partition (" + efiPartition + " => /mnt/boot/efi)..." << endl;
-				SystemUtils::csystem("mkdir /mnt/boot/efi");
-				SystemUtils::csystem("mount " + efiPartition + " /mnt/boot/efi");
-			}
-
-			cout << "Turning SWAP on (" + swapVolume + ")..." << endl;
-			SystemUtils::csystem("swapon " + swapVolume);
 		}
 		else
 		{
 			cout << "root and swap..." << endl;
 
-			string swapPartition = args["disk-device"].as<string>() + "2";
-			cout << "Creating swap partition (" + swapPartition + ")..." << endl;
+			swapPartition = args["disk-device"].as<string>() + "2";
+			cout << "Creating swap partition (" << swapPartition << ", RAM: " << ramSize << ramSizeUnit << ", SWAP: " << swapSize << swapSizeUnit << ")..." << endl;
 			SystemUtils::csystem("sgdisk -n 2:0:+" + to_string(swapSize) + swapSizeUnit + " -t 2:8300 " + args["disk-device"].as<string>());
-			cout << "Creating FS for swap partition..." << endl;
-			SystemUtils::csystem("mkswap " + args["disk-device"].as<string>() + "2");
 
-			string rootPartition = args["disk-device"].as<string>() + "3";
-			cout << "Creating root partition (" + rootPartition + ")..." << endl;
+			rootPartition = args["disk-device"].as<string>() + "3";
+			cout << "Creating root partition (" << rootPartition << ")..." << endl;
 			SystemUtils::csystem("sgdisk -n 3:0:0 -t 3:8300 " + args["disk-device"].as<string>());
-			cout << "Creating FS for root partition (" + rootPartition + ")..." << endl;
-			SystemUtils::csystem("mkfs.ext4 " + rootPartition);
-
-			cout << "Mounting root partition (" + rootPartition + " => /mnt)..." << endl;
-			SystemUtils::csystem("mount " + rootPartition + " /mnt");
-
-			if(args["efi"].as<bool>())
-			{
-				cout << "Mounting EFI partition (" + efiPartition + " => /mnt/boot/efi)..." << endl;
-				SystemUtils::csystem("mkdir -p /mnt/boot/efi");
-				SystemUtils::csystem("mount " + efiPartition + " /mnt/boot/efi");
-			}
-
-			cout << "Turning SWAP on (" + swapPartition + ")..." << endl;
-			SystemUtils::csystem("swapon " + swapPartition);
 		}
+		
+		cout << "Creating FS for swap volume/partition (" << swapPartition << ")..." << endl;
+		SystemUtils::csystem("mkswap " + swapPartition);
+		
+		cout << "Creating FS for root volume/partition (" << rootPartition << ")..." << endl;
+		SystemUtils::csystem("mkfs.ext4 " + rootPartition);
+		
+		cout << "Mounting root partition (" << rootPartition << " => /mnt)..." << endl;
+		SystemUtils::csystem("mount " + rootPartition + " /mnt");
+		
+		if(args["enc-lvm"].as<bool>())
+		{
+			cout << "Mounting boot partition (" << bootPartition << " => /mnt/boot)..." << endl;
+			SystemUtils::csystem("mkdir /mnt/boot");
+			SystemUtils::csystem("mount " + bootPartition + " /mnt/boot");
+		}
+		
+		if(efi)
+		{
+			cout << "Mounting EFI partition (" << efiBiosPartition << " => /mnt/boot/efi)..." << endl;
+			SystemUtils::csystem("mkdir -p /mnt/boot/efi");
+			SystemUtils::csystem("mount " + efiBiosPartition + " /mnt/boot/efi");
+		}
+		
+		cout << "Turning SWAP on (" << swapPartition << ")..." << endl;
+		SystemUtils::csystem("swapon " + swapPartition);
 
 		// ############################################
 		cout << "Install Arch Linux base..." << endl;
-		SystemUtils::csystem("pacstrap /mnt base");
+		SystemUtils::csystem("pacstrap /mnt base efivar");
 
 		cout << "Generate fstab..." << endl;
 		SystemUtils::csystem("genfstab -U -p /mnt >> /mnt/etc/fstab");
@@ -272,9 +270,10 @@ int main(int argc, char **argv) {
 
 		SystemUtils::csystem("umount -R /mnt");
 		
+		cout << "Installation has finished. Press [Enter] to reboot..." << endl;
 		string tmpReboot;
-		cout << "Installation has finished. Press any Enter to reboot..." << endl;
-		cin >> tmpReboot;
+		getline(cin, tmpReboot);
+		
 		SystemUtils::csystem("reboot");
 	}
 	else
@@ -335,10 +334,12 @@ int main(int argc, char **argv) {
 
 		// ############################################
 		cout << "Installing and configuring GRUB..." << endl;
-		if(args["efi"].as<bool>())
+		if(efi)
 		{
+			string grubTarget = (StringUtils::trim(SystemUtils::ssystem("uname -m")) == "x86_64" ? "x86_64-efi" : "i386-efi");
+		
 			SystemUtils::csystem("pacman -S --noconfirm grub dosfstools efibootmgr");
-			SystemUtils::csystem("grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub --recheck");
+			SystemUtils::csystem("grub-install --target=" + grubTarget + " --efi-directory=/boot/efi --bootloader-id=grub --recheck");
 		}
 		else
 		{
@@ -350,11 +351,10 @@ int main(int argc, char **argv) {
 		{
 			Config grubConfig("/etc/default/grub");
 			grubConfig.setValue("GRUB_CMDLINE_LINUX", "cryptdevice=" + lvmPartition + ":" + args["lvm-vg-name"].as<string>());
-			// grub.setValue("GRUB_DISABLE_SUBMENU", "y");
+			// grubConfig.setValue("GRUB_DISABLE_SUBMENU", "y");
 			grubConfig.save();
 		}
 
-		SystemUtils::csystem("chmod -x /etc/grub.d/10_linux");
 		SystemUtils::csystem("grub-mkconfig -o /boot/grub/grub.cfg");
 	}
 

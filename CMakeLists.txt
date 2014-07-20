@@ -5,7 +5,7 @@ project(arch-linux-installer)
 add_definitions("-std=c++11")
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost 1.53 COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 

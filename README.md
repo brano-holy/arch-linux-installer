@@ -16,21 +16,21 @@ page.
 
 Usage
 -----
-1. Boot Arch Linux installation [image](https://www.archlinux.org/download/) (you 
-can use [arch-linux-usb-creator](https://github.com/branoholy/arch-linux-usb-creator) 
+1. Boot Arch Linux installation [image](https://www.archlinux.org/download/) 
+(you can use [arch-linux-usb-creator](https://github.com/branoholy/arch-linux-usb-creator) 
 to create bootable USB).
 
 2. Download binary from [Releases](https://github.com/branoholy/arch-linux-installer/releases) 
-page or build and download your own binary.
+page or build your own binary.
 
-3. Edit config file as you need (you may omit this step if you specify options 
-as command line arguments).
+3. Edit config file as you need (you may omit this step if you will specify 
+options as command line arguments).
 
 4. Run `arch-linux-installer`.
 
 With config file:
 ```bash
-$ ./arch-linux-installer -c path/to/config.conf
+$ ./arch-linux-installer path/to/config.conf
 ```
 
 Or with command line arguments:
@@ -45,8 +45,8 @@ statically). Dependencies are necessary only for building.
 
 `arch-linux-installer` is using:
 
-* Boost.Program_options library (version 1.53 
-or newer) - [http://www.boost.org/doc/libs/1\_53\_0/doc/html/program\_options.html](http://www.boost.org/doc/libs/1_53_0/doc/html/program_options.html).
+* Boost.Program_options library (version 1.53 or newer) - 
+[http://www.boost.org/doc/libs/release/doc/html/program\_options.html](http://www.boost.org/doc/libs/release/doc/html/program_options.html).
 
 Building
 --------

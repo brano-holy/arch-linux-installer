@@ -59,12 +59,14 @@ string StringUtils::join(char glue, const vector<string>& values)
 
 string StringUtils::trim(const string& str)
 {
-	string::size_type firstPos = str.find_first_not_of(' ');
+	string whiteChars = " \n\r\t";
+
+	string::size_type firstPos = str.find_first_not_of(whiteChars);
 	if(firstPos == string::npos)
 	{
 		return "";
 	}
 
-	string::size_type lastPos = str.find_last_not_of(' ');
+	string::size_type lastPos = str.find_last_not_of(whiteChars);
 	return str.substr(firstPos, lastPos - firstPos + 1);
 }
