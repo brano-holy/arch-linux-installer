@@ -10,9 +10,9 @@ on whole disk. It supports BIOS/EFI and encrypted LVM.
 
 Download
 --------
-You can download source code and build `arch-linux-installer` according to build 
-instruction below or download binaries from [Releases](https://github.com/branoholy/arch-linux-installer/releases) 
-page.
+You can download source code and build `arch-linux-installer` according to 
+[build instruction](#build) below or download binaries from 
+[Releases](https://github.com/branoholy/arch-linux-installer/releases) page.
 
 Usage
 -----
@@ -45,8 +45,8 @@ statically). Dependencies are necessary only for building.
 
 `arch-linux-installer` is using:
 
-* Boost.Program_options library (version 1.53 or newer) - 
-[http://www.boost.org/doc/libs/release/doc/html/program\_options.html](http://www.boost.org/doc/libs/release/doc/html/program_options.html).
+* [Boost.Program_options](http://www.boost.org/doc/libs/release/doc/html/program_options.html) 
+library (version 1.53 or newer).
 
 Building
 --------
