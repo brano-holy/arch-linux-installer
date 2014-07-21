@@ -21,22 +21,21 @@ Usage
 to create bootable USB).
 
 2. Download binary from [Releases](https://github.com/branoholy/arch-linux-installer/releases) 
-page or build your own binary.
+page or [build](#build) your own binary.
 
-3. Edit config file as you need (you may omit this step if you will specify 
-options as command line arguments).
+3. Edit [config](#config) file as you need 
+(you may omit this step if you will specify options as command line arguments).
 
 4. Run `arch-linux-installer`.
 
-With config file:
 ```bash
-$ ./arch-linux-installer path/to/config.conf
+$ ./arch-linux-installer [options] [<config-path>]
 ```
 
-Or with command line arguments:
-```bash
-$ ./arch-linux-installer --disk-device /dev/sda --locales "en_US.UTF-8 UTF-8" --lang en_US --hostname my-arch --timezone Europe/Prague
-```
+### Config
+Config files are using INI-like syntax (see [examples](https://github.com/branoholy/arch-linux-installer/tree/master/examples)).
+
+To show all possible options, simply run `arch-linux-installer` without options.
 
 Dependencies
 ------------
@@ -48,9 +47,9 @@ statically). Dependencies are necessary only for building.
 * [Boost.Program_options](http://www.boost.org/doc/libs/release/doc/html/program_options.html) 
 library (version 1.53 or newer).
 
-Building
---------
-Make sure you have installed all dependencies before building.
+Build
+-----
+Make sure you have installed all [dependencies](#dependencies) before building.
 
 ```bash
 $ mkdir build && cd build
@@ -66,14 +65,21 @@ $ cmake --build . -- -j4
 
 Where option `-j4` means you want to use 4 cores for building.
 
-Config syntax
--------------
-Config files are using INI-like syntax (see [examples](https://github.com/branoholy/arch-linux-installer/tree/master/examples)).
+Examples
+--------
+Run `arch-linux-installer` with config file:
+```bash
+$ ./arch-linux-installer path/to/config.conf
+```
 
-To show all possible options, simply run `arch-linux-installer` without options.
+Run `arch-linux-installer` with command line arguments:
+```bash
+$ ./arch-linux-installer --disk-device /dev/sda --locales "en_US.UTF-8 UTF-8" --lang en_US --hostname my-arch --timezone Europe/Prague
+```
 
 License
 -------
 Arch Linux Installer is licensed under GNU GPL v3 (see 
 [COPYING](https://github.com/branoholy/arch-linux-installer/blob/master/COPYING) 
 file).
+
