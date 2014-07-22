@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 {
 	cout.setf(ios_base::boolalpha);
 
-	string programName = "arch-linux-installer";
+	string programName = "archlinux-installer";
 	string programPath = string(argv[0]);
 
 	po::options_description genOptions("General options");

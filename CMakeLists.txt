@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(arch-linux-installer)
+project(archlinux-installer)
 
 add_definitions("-std=c++11")
 
@@ -10,8 +10,8 @@ include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 
 file(GLOB ALI_SRC_CPP src/*.cpp src/configuration/*.cpp src/utils/*.cpp)
-add_executable(arch-linux-installer ${ALI_SRC_CPP})
+add_executable(archlinux-installer ${ALI_SRC_CPP})
 
 add_subdirectory(src)
 
-target_link_libraries(arch-linux-installer ${Boost_LIBRARIES})
+target_link_libraries(archlinux-installer ${Boost_LIBRARIES})
