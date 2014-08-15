@@ -11,7 +11,7 @@ on a whole disk. It supports BIOS/EFI and encrypted LVM.
 Download
 --------
 You can download the source code and build `archlinux-installer` according to 
-the [build instruction](#build) below or download binaries from the 
+the [build instructions](#build) below or download binaries from the 
 [Releases](https://github.com/branoholy/archlinux-installer/releases) page.
 
 Usage
