@@ -3,27 +3,27 @@ Arch Linux Installer
 
 archlinux-installer
 --------------------
-*Unofficial installer for Arch Linux using config file.*
+*An unofficial installer for Arch Linux using a config file.*
 
-`archlinux-installer` installs clean and minimal Arch Linux installation 
-on whole disk. It supports BIOS/EFI and encrypted LVM.
+`archlinux-installer` installs a clean and minimal Arch Linux installation 
+on a whole disk. It supports BIOS/EFI and encrypted LVM.
 
 Download
 --------
-You can download source code and build `archlinux-installer` according to 
-[build instruction](#build) below or download binaries from 
+You can download the source code and build `archlinux-installer` according to 
+the [build instruction](#build) below or download binaries from the 
 [Releases](https://github.com/branoholy/archlinux-installer/releases) page.
 
 Usage
 -----
 1. Boot Arch Linux installation [image](https://www.archlinux.org/download/) 
 (you can use [archlinux-usb-creator](https://github.com/branoholy/archlinux-usb-creator) 
-to create bootable USB).
+to create a bootable USB).
 
-2. Download binary from [Releases](https://github.com/branoholy/archlinux-installer/releases) 
+2. Download a binary from the [Releases](https://github.com/branoholy/archlinux-installer/releases) 
 page or [build](#build) your own binary.
 
-3. Edit [config](#config) file as you need 
+3. Edit the [config](#config) file as you need 
 (you may omit this step if you will specify options as command line arguments).
 
 4. Run `archlinux-installer`.
@@ -39,8 +39,8 @@ To show all possible options, simply run `archlinux-installer` without options.
 
 Dependencies
 ------------
-There are no dependencies for running binary release (all libraries are linked 
-statically). Dependencies are necessary only for building.
+There are no dependencies for running the binary release (all libraries are 
+linked statically). Dependencies are necessary only for building.
 
 `archlinux-installer` is using:
 
@@ -57,17 +57,17 @@ $ cmake ..
 $ cmake --build .
 ```
 
-For faster build on multicore processor, you can use:
+For faster build on a multicore processor, you can use:
 
 ```bash
 $ cmake --build . -- -j4
 ```
 
-Where option `-j4` means you want to use 4 cores for building.
+Where the option `-j4` means you want to use 4 cores for building.
 
 Examples
 --------
-Run `archlinux-installer` with config file:
+Run `archlinux-installer` with a config file:
 ```bash
 $ ./archlinux-installer path/to/config.conf
 ```

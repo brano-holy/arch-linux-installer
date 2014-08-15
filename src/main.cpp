@@ -98,7 +98,7 @@ int main(int argc, char **argv)
 
 	if(argc == 1 || args["help"].as<bool>())
 	{
-		cout << "Usage: " << programName << " [options] [config-path]" << endl;
+		cout << "Usage: " << programName << " [options] [<config-path>]" << endl;
 		cout << cmdOptions << endl;
 		return 0;
 	}
@@ -266,6 +266,7 @@ int main(int argc, char **argv)
 
 		SystemUtils::csystem("arch-chroot /mnt /root/" + programName + " -c /root/" + programName + ".conf --chrooted");
 
+		// TODO Add option to keep program/config/both.
 		SystemUtils::csystem("rm /mnt/root/" + programName + " /mnt/root/" + programName + ".conf");
 
 		SystemUtils::csystem("umount -R /mnt");
