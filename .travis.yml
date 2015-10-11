@@ -4,7 +4,7 @@ compiler: gcc
 
 before_install:
   - export CI_SOURCE_PATH=$(pwd)
-  - sudo apt-get install libboost-dev
+  - sudo apt-get install libboost-dev libgcc-5-dev
   - mkdir added-libs && cd added-libs
   - git clone https://github.com/jbeder/yaml-cpp.git
   - cd yaml-cpp && mkdir build && cd build
