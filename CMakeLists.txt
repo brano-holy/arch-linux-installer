@@ -1,17 +1,30 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(archlinux-installer)
+# Set project name
+project("archlinux-installer")
+
+# Set build type and definitions
+if($ENV{DEBUG})
+    # Debug
+    set(CMAKE_BUILD_TYPE "Debug")
+else($ENV{DEBUG})
+    # Release
+    set(CMAKE_BUILD_TYPE "Release")
+    add_definitions("-O3")
+endif($ENV{DEBUG})
 
 add_definitions("-std=c++11")
+add_definitions("-Wall -Wextra -pedantic")
 
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.53 COMPONENTS program_options REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-link_directories(${Boost_LIBRARY_DIR})
+find_package(PkgConfig)
+pkg_check_modules(YamlCpp yaml-cpp)
 
-file(GLOB ALI_SRC_CPP src/*.cpp src/configuration/*.cpp src/utils/*.cpp)
-add_executable(archlinux-installer ${ALI_SRC_CPP})
+file(GLOB_RECURSE CPPS "src/*.cpp")
+file(GLOB_RECURSE HPPS "include/*.hpp")
 
-add_subdirectory(src)
+include_directories("include")
 
-target_link_libraries(archlinux-installer ${Boost_LIBRARIES})
+add_executable(archlinux-installer ${CPPS} ${HPPS})
+
+target_link_libraries(${PROJECT_NAME} libyaml-cpp.a)
+

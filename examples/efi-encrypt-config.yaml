@@ -1,0 +1,64 @@
+# Configuration file for Arch Linux Installer.
+
+# debug: true
+log: true
+keepConfig: true
+keepProgram: true
+
+devices:
+  - device:
+      name: sda
+      path: /dev/sda
+      erase: none # none/zero/random
+      partitions:
+        - partition:
+            name: efi
+            size: 100M
+            type: ef00
+            filesystem: fat
+            mount: /boot/efi
+        - partition:
+            name: boot
+            size: 300M
+            type: 8300
+            filesystem: ext2
+            mount: /boot
+        - partition:
+            name: root (lvm)
+            size: rest
+            type: 8300
+            encryption:
+              name: lvm_pv
+              hash: sha512
+              keySize: 512 # bits
+              iterTime: 1000 # ms
+              volumeGroups:
+                - volumeGroup:
+                    name: lvm_vg
+                    volumes:
+                      - volume:
+                          name: swap
+                          size: 1.05%RAM
+                          filesystem: swap
+                      - volume:
+                          name: root
+                          size: rest
+                          filesystem: ext4
+                          mount: /
+
+settings:
+  keyboard: cz-qwertz
+  font: Lat2-Terminus16
+  locales: [en_US.UTF-8 UTF-8, cs_CZ.UTF-8 UTF-8]
+  lang: en_US
+  timezone: Europe/Prague
+  hostname: my-arch-machine
+
+users:
+  - user:
+      name: archie
+      comment: Archie Full Name
+      groups: [wheel]
+
+packages: [vim-minimal, wget, git, openssh, sudo]
+

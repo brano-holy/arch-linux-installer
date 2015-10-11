@@ -1,6 +1,6 @@
 /*
  * Arch Linux Installer
- * Copyright (C) 2014  Branislav Holý <branoholy@gmail.com>
+ * Copyright (C) 2015  Branislav Holý <branoholy@gmail.com>
  *
  * This file is part of Arch Linux Installer.
  *
@@ -19,21 +19,23 @@
  *
  */
 
-#ifndef CONFIGURATION_TEXTCONFIGLINE_HPP
-#define CONFIGURATION_TEXTCONFIGLINE_HPP
+#ifndef ARCHLINUXINSTALLER_CONFIGURATION_CONFIGLINE_HPP
+#define ARCHLINUXINSTALLER_CONFIGURATION_CONFIGLINE_HPP
 
-#include "configline.hpp"
+#include <iostream>
 
+namespace archlinuxinstaller {
 namespace configuration {
-	class TextConfigLine : public ConfigLine
+
+	class ConfigLine
 	{
-	protected:
-		std::string line;
-
 	public:
-		virtual void parseLine(const std::string& line);
-		virtual std::string writeToLine();
-	};
-}
+		virtual void parseLine(const std::string& line) = 0;
+		virtual void writeLine(std::ostream& out) const = 0;
 
-#endif // CONFIGURATION_TEXTCONFIGLINE_HPP
+		friend std::ostream& operator<<(std::ostream& out, const ConfigLine& line);
+	};
+
+}}
+
+#endif // ARCHLINUXINSTALLER_CONFIGURATION_CONFIGLINE_HPP

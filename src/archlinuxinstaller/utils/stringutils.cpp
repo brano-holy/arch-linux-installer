@@ -1,6 +1,6 @@
 /*
  * Arch Linux Installer
- * Copyright (C) 2014  Branislav Holý <branoholy@gmail.com>
+ * Copyright (C) 2015  Branislav Holý <branoholy@gmail.com>
  *
  * This file is part of Arch Linux Installer.
  *
@@ -19,54 +19,37 @@
  *
  */
 
-#include "stringutils.hpp"
+#include "archlinuxinstaller/utils/stringutils.hpp"
 
 #include <sstream>
 
-using namespace std;
-using namespace utils;
+namespace archlinuxinstaller {
+namespace utils {
 
-bool StringUtils::startsWith(const string& str, const string& prefix)
+bool StringUtils::startsWith(const std::string& str, const std::string& prefix)
 {
 	return (str.substr(0, prefix.length()) == prefix);
 }
 
-vector<string> StringUtils::split(const string& str, char delim)
+std::vector<std::string> StringUtils::split(const std::string& str, char delim)
 {
-	vector<string> parts;
-	istringstream iss(str);
+	std::vector<std::string> parts;
+	std::istringstream iss(str);
 
-	string part;
-	while(getline(iss, part, delim))
-	{
-		parts.push_back(part);
-	}
+	std::string part;
+	while(std::getline(iss, part, delim)) parts.push_back(part);
 
 	return parts;
 }
 
-string StringUtils::join(char glue, const vector<string>& values)
+std::string StringUtils::trim(const std::string& str, const std::string& whiteChars)
 {
-	string str = values[0];
-	for(vector<string>::size_type i = 1; i < values.size(); i++)
-	{
-		str += glue;
-		str += values[i];
-	}
+	std::size_t firstPos = str.find_first_not_of(whiteChars);
+	if(firstPos == std::string::npos) return "";
 
-	return str;
+	std::size_t lastPos = str.find_last_not_of(whiteChars);
+	return str.substr(firstPos, lastPos - firstPos + 1);
 }
 
-string StringUtils::trim(const string& str)
-{
-	string whiteChars = " \n\r\t";
-
-	string::size_type firstPos = str.find_first_not_of(whiteChars);
-	if(firstPos == string::npos)
-	{
-		return "";
-	}
-
-	string::size_type lastPos = str.find_last_not_of(whiteChars);
-	return str.substr(firstPos, lastPos - firstPos + 1);
+}
 }

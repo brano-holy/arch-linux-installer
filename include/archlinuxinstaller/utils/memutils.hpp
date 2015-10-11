@@ -1,6 +1,6 @@
 /*
  * Arch Linux Installer
- * Copyright (C) 2014  Branislav Holý <branoholy@gmail.com>
+ * Copyright (C) 2015  Branislav Holý <branoholy@gmail.com>
  *
  * This file is part of Arch Linux Installer.
  *
@@ -19,6 +19,30 @@
  *
  */
 
-#include "utils/memutils.hpp"
-#include "utils/stringutils.hpp"
-#include "utils/systemutils.hpp"
+#ifndef ARCHLINUXINSTALLER_UTILS_MEMUTILS_HPP
+#define ARCHLINUXINSTALLER_UTILS_MEMUTILS_HPP
+
+#include <vector>
+
+namespace archlinuxinstaller {
+namespace utils {
+
+	class MemUtils
+	{
+	public:
+		template<typename T>
+		static void deleteVector(const std::vector<T>& data);
+	};
+
+	template<typename T>
+	void MemUtils::deleteVector(const std::vector<T>& data)
+	{
+		for(const T& item : data)
+		{
+			delete item;
+		}
+	}
+
+}}
+
+#endif // ARCHLINUXINSTALLER_UTILS_MEMUTILS_HPP

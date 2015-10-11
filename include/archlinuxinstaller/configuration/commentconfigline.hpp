@@ -1,6 +1,6 @@
 /*
  * Arch Linux Installer
- * Copyright (C) 2014  Branislav Holý <branoholy@gmail.com>
+ * Copyright (C) 2015  Branislav Holý <branoholy@gmail.com>
  *
  * This file is part of Arch Linux Installer.
  *
@@ -19,31 +19,33 @@
  *
  */
 
-#ifndef CONFIGURATION_VARCONFIGLINE_HPP
-#define CONFIGURATION_VARCONFIGLINE_HPP
+#ifndef ARCHLINUXINSTALLER_CONFIGURATION_COMMENTCONFIGLINE_HPP
+#define ARCHLINUXINSTALLER_CONFIGURATION_COMMENTCONFIGLINE_HPP
 
 #include "configline.hpp"
-#include "commentconfigline.hpp"
 
+namespace archlinuxinstaller {
 namespace configuration {
-	class VarConfigLine : public CommentConfigLine
+
+	class CommentConfigLine : public ConfigLine
 	{
-	protected:
-		std::string name;
-		std::string value;
+	private:
+		bool commentPresent;
+		std::string comment;
 
 	public:
-		VarConfigLine();
-		VarConfigLine(const std::string& name);
+		CommentConfigLine();
 
 		virtual void parseLine(const std::string& line);
-		virtual std::string writeToLine();
+		virtual void writeLine(std::ostream& out) const;
 
-		std::string getName();
+		inline bool hasComment() const { return commentPresent; }
 
-		std::string getValue();
-		void setValue(std::string value);
+		inline std::string getComment() const { return comment; }
+		void setComment(const std::string& comment);
+		void removeComment();
 	};
-}
 
-#endif // CONFIGURATION_VARCONFIGLINE_HPP
+}}
+
+#endif // ARCHLINUXINSTALLER_CONFIGURATION_COMMENTCONFIGLINE_HPP

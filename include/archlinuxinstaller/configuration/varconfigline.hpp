@@ -1,6 +1,6 @@
 /*
  * Arch Linux Installer
- * Copyright (C) 2014  Branislav Holý <branoholy@gmail.com>
+ * Copyright (C) 2015  Branislav Holý <branoholy@gmail.com>
  *
  * This file is part of Arch Linux Installer.
  *
@@ -19,49 +19,33 @@
  *
  */
 
+#ifndef ARCHLINUXINSTALLER_CONFIGURATION_VARCONFIGLINE_HPP
+#define ARCHLINUXINSTALLER_CONFIGURATION_VARCONFIGLINE_HPP
+
 #include "commentconfigline.hpp"
 
-using namespace std;
-using namespace configuration;
+namespace archlinuxinstaller {
+namespace configuration {
 
-CommentConfigLine::CommentConfigLine()
-{
-	hasComment = false;
-}
-
-void CommentConfigLine::parseLine(const string& line)
-{
-	string::size_type hashPos = line.find('#');
-	if(hashPos != string::npos)
+	class VarConfigLine : public CommentConfigLine
 	{
-		hasComment = true;
-		comment = line.substr(hashPos + 1);
-	}
-}
+	protected:
+		std::string name;
+		std::string value;
 
-string CommentConfigLine::writeToLine()
-{
-	if(hasComment)
-	{
-		return '#' + comment;
-	}
+	public:
+		VarConfigLine();
+		VarConfigLine(const std::string& name);
 
-	return "";
-}
+		virtual void parseLine(const std::string& line);
+		virtual void writeLine(std::ostream& out) const;
 
-string CommentConfigLine::getComment() const
-{
-	return comment;
-}
+		inline std::string getName() const { return name; }
 
-void CommentConfigLine::setComment(const string& comment)
-{
-	this->comment = comment;
-	hasComment = true;
-}
+		inline std::string getValue() const { return value; }
+		inline void setValue(const std::string& value) { this->value = value; }
+	};
 
-void CommentConfigLine::removeComment()
-{
-	comment = "";
-	hasComment = false;
-}
+}}
+
+#endif // ARCHLINUXINSTALLER_CONFIGURATION_VARCONFIGLINE_HPP

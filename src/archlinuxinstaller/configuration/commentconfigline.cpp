@@ -1,6 +1,6 @@
 /*
  * Arch Linux Installer
- * Copyright (C) 2014  Branislav Holý <branoholy@gmail.com>
+ * Copyright (C) 2015  Branislav Holý <branoholy@gmail.com>
  *
  * This file is part of Arch Linux Installer.
  *
@@ -19,19 +19,41 @@
  *
  */
 
-#ifndef CONFIGURATION_CONFIGLINE_HPP
-#define CONFIGURATION_CONFIGLINE_HPP
+#include "archlinuxinstaller/configuration/commentconfigline.hpp"
 
-#include <string>
-
+namespace archlinuxinstaller {
 namespace configuration {
-	class ConfigLine
-	{
-	public:
-		virtual void parseLine(const std::string& line) = 0;
-		virtual std::string writeToLine() = 0;
 
-	};
+CommentConfigLine::CommentConfigLine() :
+	commentPresent(false)
+{
 }
 
-#endif // CONFIGURATION_CONFIGLINE_HPP
+void CommentConfigLine::parseLine(const std::string& line)
+{
+	std::size_t hashPos = line.find('#');
+	if(hashPos != std::string::npos)
+	{
+		commentPresent = true;
+		comment = line.substr(hashPos + 1);
+	}
+}
+
+void CommentConfigLine::writeLine(std::ostream& out) const
+{
+	if(commentPresent) out << '#' << comment;
+}
+
+void CommentConfigLine::setComment(const std::string& comment)
+{
+	this->comment = comment;
+	commentPresent = true;
+}
+
+void CommentConfigLine::removeComment()
+{
+	comment = "";
+	commentPresent = false;
+}
+
+}}

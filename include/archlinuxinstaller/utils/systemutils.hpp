@@ -1,6 +1,6 @@
 /*
  * Arch Linux Installer
- * Copyright (C) 2014  Branislav Holý <branoholy@gmail.com>
+ * Copyright (C) 2015  Branislav Holý <branoholy@gmail.com>
  *
  * This file is part of Arch Linux Installer.
  *
@@ -19,21 +19,32 @@
  *
  */
 
-#ifndef UTILS_SYSTEMUTILS_HPP
-#define UTILS_SYSTEMUTILS_HPP
+#ifndef ARCHLINUXINSTALLER_UTILS_SYSTEMUTILS_HPP
+#define ARCHLINUXINSTALLER_UTILS_SYSTEMUTILS_HPP
 
 #include <string>
 
+namespace archlinuxinstaller {
 namespace utils {
+
 	class SystemUtils
 	{
 	public:
-		static int csystem(std::string cmd);
-		static std::string ssystem(std::string cmd, int bufferSize = 256);
+		static bool DEBUG;
 
-		static int getRAMSize(char &unit);
+		static int csystem(const std::string& cmd);
+		static std::string ssystem(const std::string& cmd, int bufferSize = 256);
+
+		static int getRAMSize(char& unit);
 		static int alignSize(int minSize, int aligment = 2048);
-	};
-}
 
-#endif // UTILS_SYSTEMUTILS_HPP
+		static std::string getSizeByCommand(std::string size, const std::string& command);
+
+		static void createFilesystem(const std::string& filesystem, const std::string& partition);
+
+		static std::string readPassword(const std::string& passwordName);
+	};
+
+}}
+
+#endif // ARCHLINUXINSTALLER_UTILS_SYSTEMUTILS_HPP

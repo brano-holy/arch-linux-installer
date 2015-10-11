@@ -1,6 +1,6 @@
 /*
  * Arch Linux Installer
- * Copyright (C) 2014  Branislav Holý <branoholy@gmail.com>
+ * Copyright (C) 2015  Branislav Holý <branoholy@gmail.com>
  *
  * This file is part of Arch Linux Installer.
  *
@@ -19,21 +19,15 @@
  *
  */
 
-#ifndef UTILS_STRINGUTILS_HPP
-#define UTILS_STRINGUTILS_HPP
+#include "archlinuxinstaller/configuration/configline.hpp"
 
-#include <string>
-#include <vector>
+namespace archlinuxinstaller {
+namespace configuration {
 
-namespace utils {
-	class StringUtils
+	std::ostream& operator<<(std::ostream& out, const ConfigLine& line)
 	{
-		public:
-			static bool startsWith(const std::string& str, const std::string& prefix);
-			static std::vector<std::string> split(const std::string& str, char delim);
-			static std::string join(char glue, const std::vector<std::string>& values);
-			static std::string trim(const std::string& str);
-	};
-}
+		line.writeLine(out);
+		return out;
+	}
 
-#endif // UTILS_STRINGUTILS_HPP
+}}

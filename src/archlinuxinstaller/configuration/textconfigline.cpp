@@ -1,6 +1,6 @@
 /*
  * Arch Linux Installer
- * Copyright (C) 2014  Branislav Holý <branoholy@gmail.com>
+ * Copyright (C) 2015  Branislav Holý <branoholy@gmail.com>
  *
  * This file is part of Arch Linux Installer.
  *
@@ -19,29 +19,19 @@
  *
  */
 
-#ifndef UTILS_MEMUTILS_HPP
-#define UTILS_MEMUTILS_HPP
+#include "archlinuxinstaller/configuration/textconfigline.hpp"
 
-#include <vector>
+namespace archlinuxinstaller {
+namespace configuration {
 
-namespace utils {
-	class MemUtils
-	{
-		public:
-			template<typename T>
-			static void deleteVector(const std::vector<T>& data);
-	};
-
-	template<typename T>
-	void MemUtils::deleteVector(const std::vector<T>& data)
-	{
-		typedef typename std::vector<T>::size_type vector_size_type;
-
-		for(vector_size_type i = 0; i < data.size(); i++)
-		{
-			delete data.at(i);
-		}
-	}
+void TextConfigLine::parseLine(const std::string& line)
+{
+	this->line = line;
 }
 
-#endif // UTILS_MEMUTILS_HPP
+void TextConfigLine::writeLine(std::ostream& out) const
+{
+	out << line;
+}
+
+}}
