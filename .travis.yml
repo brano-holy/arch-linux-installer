@@ -3,6 +3,7 @@ language: cpp
 compiler: gcc
 
 before_install:
+  - export CI_SOURCE_PATH=$(pwd)
   - sudo apt-get install libboost-dev
   - mkdir added-libs && cd added-libs
   - git clone https://github.com/jbeder/yaml-cpp.git
@@ -10,14 +11,17 @@ before_install:
   - cmake ..
 
 install:
+  - cd $CI_SOURCE_PATH
   - cd added-libs/yaml-cpp/build
   - make -j$(nproc)
   - sudo make install
 
 before_script:
+  - cd $CI_SOURCE_PATH
   - mkdir build && cd build
   - cmake ..
 
 script:
+  - cd $CI_SOURCE_PATH
   - cd build
   - make -j$(nproc)
