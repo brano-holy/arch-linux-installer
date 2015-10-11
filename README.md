@@ -1,21 +1,17 @@
-Arch Linux Installer
-====================
+# Arch Linux Installer
 
-archlinux-installer
---------------------
+## archlinux-installer
 *An unofficial installer for Arch Linux using a config file.*
 
 `archlinux-installer` installs a clean and minimal Arch Linux installation. It 
 supports BIOS/EFI and encrypted LVM.
 
-Download
---------
+## Download
 You can download the source code and build `archlinux-installer` according to 
 the [build instructions](#build) below or download a binary from the 
 [Releases](https://github.com/branoholy/archlinux-installer/releases) page.
 
-Usage
------
+## Usage
 1. Boot Arch Linux installation [image](https://www.archlinux.org/download/) 
 (you can use [archlinux-usb-creator](https://github.com/branoholy/archlinux-usb-creator) 
 to create a bootable USB).
@@ -32,13 +28,12 @@ $ ./archlinux-installer <config-path>
 ```
 
 ### Config
-Config files use [YAML](http://yaml.org/) syntax (see [examples](https://github.com/branoholy/archlinux-installer/tree/master/examples)).
+Config files use [YAML](http://yaml.org/) syntax (see [examples](https://github.com/branoholy/archlinux-installer/tree/master/examples)). 
+When writing your own config files, you can start with 
+[config.yaml](https://github.com/branoholy/archlinux-installer/blob/master/examples/config.yaml) 
+that contains all available options.
 
-See [config.yaml](https://github.com/branoholy/archlinux-installer/blob/master/examples/config.yaml) 
-to known all possible options.
-
-Dependencies
-------------
+## Dependencies
 There are no dependencies for running the binary release (all libraries are 
 linked statically). Dependencies are necessary only for building.
 
@@ -47,8 +42,7 @@ linked statically). Dependencies are necessary only for building.
 * [yaml-cpp](https://github.com/jbeder/yaml-cpp) 
 library (version 0.5.1 or newer).
 
-Build
------
+## Build
 Make sure you have installed all [dependencies](#dependencies) before building.
 
 ```bash
@@ -65,15 +59,13 @@ $ cmake --build . -- -j4
 
 Where the option `-j4` means you want to use 4 cores for building.
 
-Examples
---------
+## Examples
 Run `archlinux-installer` with a config file:
 ```bash
 $ ./archlinux-installer path/to/config.yaml
 ```
 
-License
--------
+## License
 Arch Linux Installer is licensed under GNU GPL v3 (see 
 [LICENSE](https://github.com/branoholy/archlinux-installer/blob/master/LICENSE) 
 file).
