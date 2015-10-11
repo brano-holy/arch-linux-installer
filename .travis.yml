@@ -4,12 +4,13 @@ compiler: gcc
 
 before_install:
   - sudo apt-get install libboost-dev
+  - mkdir added-libs && cd added-libs
   - git clone https://github.com/jbeder/yaml-cpp.git
   - cd yaml-cpp && mkdir build && cd build
   - cmake ..
 
 install:
-  - yaml-cpp/build
+  - cd added-libs/yaml-cpp/build
   - make -j$(nproc)
   - sudo make install
 
