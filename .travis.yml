@@ -1,0 +1,21 @@
+language: cpp
+
+compiler: gcc
+
+before_install:
+  - git clone https://github.com/jbeder/yaml-cpp.git
+  - cd yaml-cpp && mkdir build && cd build
+  - cmake ..
+
+install:
+  - yaml-cpp/build
+  - make -j$(nproc)
+  - sudo make install
+
+before_script:
+  - mkdir build && cd build
+  - cmake ..
+
+script:
+  - cd build
+  - make -j$(nproc)
