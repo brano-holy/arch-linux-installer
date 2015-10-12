@@ -1,4 +1,5 @@
 # Arch Linux Installer
+[![Build Status](https://travis-ci.org/branoholy/archlinux-installer.svg?branch=master)](https://travis-ci.org/branoholy/archlinux-installer)
 
 ## archlinux-installer
 *An unofficial installer for Arch Linux using a config file.*
