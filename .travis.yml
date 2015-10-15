@@ -5,29 +5,27 @@ language: cpp
 compiler: gcc
 
 before_install:
-  - export cwd=$(pwd)
+  - export repo=$(pwd)
+  - cd ~
   - export CXX="g++-4.9"
-  - gcc --version
-  - mkdir added-libs && cd added-libs
+  - g++-4.9 --version
+  - mkdir libs && cd libs
   - git clone https://github.com/jbeder/yaml-cpp.git
   - cd yaml-cpp && mkdir build && cd build
   - cmake ..
 
 install:
-  - cd $cwd
-  - cd added-libs/yaml-cpp
-  - export PATH=$PATH:$(pwd)/include
-  - cd build
+  - cd ~/libs/yaml-cpp/build
   - make -j$(nproc)
   - export PATH=$PATH:$(pwd)
 
 before_script:
-  - cd $cwd
+  - cd $repo
   - mkdir build && cd build
   - cmake ..
 
 script:
-  - cd $cwd
+  - cd $repo
   - cd build
   - make -j$(nproc)
 
