@@ -8,14 +8,14 @@ before_install:
   - cd ~
   - export CXX="g++-4.9"
   - g++-4.9 --version
-#  - mkdir libs && cd libs
-#  - git clone https://github.com/jbeder/yaml-cpp.git
-#  - cd yaml-cpp && mkdir build && cd build
-#  - cmake ..
+  - mkdir libs && cd libs
+  - git clone https://github.com/jbeder/yaml-cpp.git
+  - cd yaml-cpp && mkdir build && cd build
+  - cmake ..
 
 install:
   - cd ~/libs/yaml-cpp/build
-#  - make -j$(nproc)
+  - make -j$(nproc)
   - export PATH=$PATH:$(pwd)
 
 before_script:
@@ -36,7 +36,3 @@ addons:
     packages:
       - g++-4.9
       - libboost1.55-dev
-
-cache:
-  directories:
-    - ~/libs
