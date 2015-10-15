@@ -5,8 +5,8 @@ language: cpp
 compiler: gcc
 
 before_install:
-  - export repo=$(pwd)
   - cd ~
+  - rm -r libs
   - export CXX="g++-4.9"
   - g++-4.9 --version
   - mkdir libs && cd libs
@@ -20,12 +20,12 @@ install:
   - export PATH=$PATH:$(pwd)
 
 before_script:
-  - cd $repo
+  - cd $TRAVIS_BUILD_DIR
   - mkdir build && cd build
   - cmake ..
 
 script:
-  - cd $repo
+  - cd $TRAVIS_BUILD_DIR
   - cd build
   - make -j$(nproc)
 
