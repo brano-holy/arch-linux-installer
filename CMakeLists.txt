@@ -16,8 +16,8 @@ endif($ENV{DEBUG})
 add_definitions("-std=c++11")
 add_definitions("-Wall -Wextra -pedantic")
 
-find_package(PkgConfig)
-pkg_check_modules(YamlCpp yaml-cpp)
+find_package(yaml-cpp)
+include_directories(${YAML_CPP_INCLUDE_DIR})
 
 file(GLOB_RECURSE CPPS "src/*.cpp")
 file(GLOB_RECURSE HPPS "include/*.hpp")
@@ -26,5 +26,5 @@ include_directories("include")
 
 add_executable(archlinux-installer ${CPPS} ${HPPS})
 
-target_link_libraries(${PROJECT_NAME} libyaml-cpp.a)
+target_link_libraries(${PROJECT_NAME} ${YAML_CPP_LIBRARIES})
 
