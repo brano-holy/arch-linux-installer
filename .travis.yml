@@ -6,18 +6,17 @@ compiler: gcc
 
 before_install:
   - cd ~
-  - rm -r libs
   - export CXX="g++-4.9"
   - g++-4.9 --version
-  - mkdir libs && cd libs
-  - git clone https://github.com/jbeder/yaml-cpp.git
-  - cd yaml-cpp && mkdir build && cd build
-  - cmake ..
+#  - mkdir libs && cd libs
+#  - git clone https://github.com/jbeder/yaml-cpp.git
+#  - cd yaml-cpp && mkdir build && cd build
+#  - cmake ..
 
 install:
   - cd ~/libs/yaml-cpp/build
-  - make -j$(nproc)
-  - export PATH=$PATH:$(pwd)
+#  - make -j$(nproc)
+#  - export PATH=$PATH:$(pwd)
 
 before_script:
   - cd $TRAVIS_BUILD_DIR
