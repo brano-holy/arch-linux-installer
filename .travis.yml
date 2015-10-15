@@ -16,7 +16,7 @@ before_install:
 install:
   - cd ~/libs/yaml-cpp/build
 #  - make -j$(nproc)
-#  - export PATH=$PATH:$(pwd)
+  - export PATH=$PATH:$(pwd)
 
 before_script:
   - cd $TRAVIS_BUILD_DIR
