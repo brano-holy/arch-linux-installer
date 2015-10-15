@@ -8,6 +8,7 @@ before_install:
   - cd ~
   - export CXX="g++-4.9"
   - g++-4.9 --version
+  - rm -rf libs/
   - mkdir libs && cd libs
   - git clone https://github.com/jbeder/yaml-cpp.git
   - cd yaml-cpp && mkdir build && cd build
