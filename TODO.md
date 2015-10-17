@@ -6,4 +6,4 @@
   for a network configuration.
 * Setup [Wake-on-LAN](https://wiki.archlinux.org/index.php/Wake-on-LAN#systemd-networkd) using systemd-networkd.
 * Automatically [refresh a mirrorlist](https://wiki.archlinux.org/index.php/Mirrors#Script_to_download_from_Mirrorlist_Generator).
-* Setup [decryption over SSH](https://wiki.archlinux.org/index.php/Dm-crypt/Specialties#Remote_unlocking_of_the_root_.28or_other.29_partition)).
+* Setup [decryption over SSH](https://wiki.archlinux.org/index.php/Dm-crypt/Specialties#Remote_unlocking_of_the_root_.28or_other.29_partition).
