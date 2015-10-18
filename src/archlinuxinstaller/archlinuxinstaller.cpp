@@ -593,7 +593,7 @@ std::string ArchLinuxInstaller::getDeviceName(const YAML::Node& node, const std:
 
 int ArchLinuxInstaller::downloadAurPackage(const std::string& packageName)
 {
-	return utils::SystemUtils::csystem("wget " + utils::StringUtils::sprintf(AUR_URL, packageName));
+	return utils::SystemUtils::csystem("wget " + utils::StringUtils::sprintf(AUR_URL, packageName.c_str()));
 }
 
 int ArchLinuxInstaller::installAurPackage(const std::string& packageName, const std::string& user, bool asdeps)
@@ -603,7 +603,7 @@ int ArchLinuxInstaller::installAurPackage(const std::string& packageName, const 
 	downloadAurPackage(packageName);
 	utils::SystemUtils::csystem("tar -xf " + packageName + ".tar.gz");
 	utils::SystemUtils::csystem("cd " + packageName);
-	std::string depends = utils::SystemUtils::ssystem("grep depends PKGBUILD | sed -r 's/^depends=\((.*)\)$/\\1/g'");
+	std::string depends = utils::SystemUtils::ssystem("grep depends PKGBUILD | sed -r 's/^depends=\\((.*)\\)$/\\1/g'");
 	utils::SystemUtils::csystem("exit");
 
 	std::string dependsToInstall = utils::SystemUtils::ssystem("pacman -T " + depends);

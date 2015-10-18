@@ -41,7 +41,7 @@ public:
 	static std::string trim(const std::string& str, const std::string& whiteChars = " \n\r\t");
 
 	template<typename... Args>
-	std::string sprintf(const std::string& command, Args... params);
+	static std::string sprintf(const std::string& command, Args... params);
 };
 
 template <typename ForwardIterator, typename GlueT>
