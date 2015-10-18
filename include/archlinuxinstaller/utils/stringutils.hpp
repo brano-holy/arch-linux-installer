@@ -44,12 +44,14 @@ template <typename ForwardIterator, typename GlueT>
 std::string StringUtils::join(ForwardIterator begin, ForwardIterator end, GlueT glue)
 {
 	std::string str;
-	if(begin != end) str = *begin;
-
-	for(auto it = begin + 1; it != end; it++)
+	if(begin != end)
 	{
-		str += glue;
-		str += *it;
+		str = *begin;
+		for(auto it = begin + 1; it != end; it++)
+		{
+			str += glue;
+			str += *it;
+		}
 	}
 
 	return str;
