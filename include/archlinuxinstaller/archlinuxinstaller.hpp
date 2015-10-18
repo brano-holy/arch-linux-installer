@@ -106,8 +106,6 @@ private:
 	void createUsers() const;
 
 	static std::string getDeviceName(const YAML::Node& node, const std::string& path = "");
-
-	static int downloadAurPackage(const std::string& packageName);
 	static int installAurPackage(const std::string& packageName, const std::string& user, bool asdeps = false);
 
 public:

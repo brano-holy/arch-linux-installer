@@ -178,6 +178,7 @@ int ArchLinuxInstaller::installChroot()
 	updateMkinitcpio();
 	installGrub();
 	installPackages();
+	installAurPackages();
 	createUsers();
 
 	return 0;
@@ -591,38 +592,57 @@ std::string ArchLinuxInstaller::getDeviceName(const YAML::Node& node, const std:
 	return name;
 }
 
-int ArchLinuxInstaller::downloadAurPackage(const std::string& packageName)
-{
-	return utils::SystemUtils::csystem("wget " + utils::StringUtils::sprintf(AUR_URL, packageName.c_str()));
-}
-
 int ArchLinuxInstaller::installAurPackage(const std::string& packageName, const std::string& user, bool asdeps)
 {
-	utils::SystemUtils::csystem("su " + user);
-	utils::SystemUtils::csystem("cd");
-	downloadAurPackage(packageName);
-	utils::SystemUtils::csystem("tar -xf " + packageName + ".tar.gz");
-	utils::SystemUtils::csystem("cd " + packageName);
-	std::string depends = utils::SystemUtils::ssystem("grep depends PKGBUILD | sed -r 's/^depends=\\((.*)\\)$/\\1/g'");
-	utils::SystemUtils::csystem("exit");
+	std::string packagePath = "/home/" + user + '/' + packageName;
 
-	std::string dependsToInstall = utils::SystemUtils::ssystem("pacman -T " + depends);
-	std::vector<std::string> dependsPackages = utils::StringUtils::split(dependsToInstall, '\n');
-	std::transform(dependsPackages.begin(), dependsPackages.end(),
-				   dependsPackages.begin(), [](const std::string& s) { return '\'' + s + '\''; });
+	std::cout << "> Downloading AUR package '" << packageName << "'..." << std::endl;
 
-	dependsToInstall = utils::StringUtils::join(dependsPackages.begin(), dependsPackages.end(), ' ');
+	std::string downloadCommand = "cd;";
+	downloadCommand += "wget " + utils::StringUtils::sprintf(AUR_URL, packageName.c_str()) + ';';
+	downloadCommand += "tar -xf " + packageName + ".tar.gz";
+	utils::SystemUtils::csystem("su " + user + " -c \"" + downloadCommand + '"');
 
-	utils::SystemUtils::csystem("pacman -Sy --noconfirm --needed --asdeps " + dependsToInstall);
+	std::cout << "> Searching for missing dependencies for '" << packageName << "'..." << std::endl;
 
-	utils::SystemUtils::csystem("su " + user);
-	utils::SystemUtils::csystem("cd ~/" + packageName);
-	utils::SystemUtils::csystem("makepkg");
-	utils::SystemUtils::csystem("exit");
+	std::string pkgbuildDepends = utils::SystemUtils::ssystem("grep '^depends' " + packagePath + "/PKGBUILD | sed -r 's/^depends=\\((.*)\\)$/\\1/g'");
 
+	std::vector<std::string> pacmanDepends, aurDepends;
+	std::vector<std::string> missingDepends = utils::StringUtils::split(utils::SystemUtils::ssystem("pacman -T " + pkgbuildDepends), '\n');
+	for(const std::string& pkg : missingDepends)
+	{
+		std::string pkgName = pkg.substr(0, pkg.find_first_of("><="));
+		if(utils::SystemUtils::csystem("pacman -Ss '^" + pkgName + "$'") == 0)
+		{
+			pacmanDepends.push_back('\'' + pkg + '\'');
+		}
+		else
+		{
+			aurDepends.push_back(pkgName);
+		}
+	}
+
+	std::cout << "> Installing the missing dependencies for '" << packageName << "'..." << std::endl;
+	utils::SystemUtils::csystem("pacman -Sy --noconfirm --needed --asdeps " +
+								utils::StringUtils::join(pacmanDepends.begin(), pacmanDepends.end(), ' '));
+
+	std::cout << "> Installing the missing AUR dependencies for '" << packageName << "'..." << std::endl;
+	for(const std::string& pkg : aurDepends)
+	{
+		installAurPackage(pkg, user, true);
+	}
+
+	std::cout << "> Creating AUR package '" << packageName << "'..." << std::endl;
+	std::string createCommand = "cd " + packagePath + ";makepkg";
+	utils::SystemUtils::csystem("su " + user + " -c \"" + createCommand + '"');
+
+	std::cout << "> Installing AUR package '" << packageName << "'..." << std::endl;
 	std::string params = "--noconfirm";
 	if(asdeps) params += " --asdeps";
-	return utils::SystemUtils::csystem("pacman " + params + " -U /home/" + user + '/' + packageName + '/' + packageName + "*.pkg.tar.xz");
+	int installStatus = utils::SystemUtils::csystem("pacman " + params + " -U " + packagePath + '/' + packageName + "*.pkg.tar.xz");
+	utils::SystemUtils::csystem("rm -r " + packagePath);
+
+	return installStatus;
 }
 
 MountData::MountData(const std::string& device, const std::string& dir, bool swap) :
