@@ -22,6 +22,7 @@
 #ifndef ARCHLINUXINSTALLER_UTILS_STRINGUTILS_HPP
 #define ARCHLINUXINSTALLER_UTILS_STRINGUTILS_HPP
 
+#include <cstdio>
 #include <string>
 #include <vector>
 
@@ -38,6 +39,9 @@ public:
 	static std::string join(ForwardIterator begin, ForwardIterator end, GlueT glue);
 
 	static std::string trim(const std::string& str, const std::string& whiteChars = " \n\r\t");
+
+	template<typename... Args>
+	std::string sprintf(const std::string& command, Args... params);
 };
 
 template <typename ForwardIterator, typename GlueT>
@@ -53,6 +57,19 @@ std::string StringUtils::join(ForwardIterator begin, ForwardIterator end, GlueT 
 	}
 
 	return str;
+}
+
+template<typename... Args>
+std::string StringUtils::sprintf(const std::string& format, Args... params)
+{
+	std::size_t size = std::snprintf(nullptr, 0, format.c_str(), params...) + 1;
+	char* buffer = new char[size];
+	std::snprintf(buffer, size, format.c_str(), params...);
+
+	std::string result(buffer, buffer + size - 1);
+	delete[] buffer;
+
+	return result;
 }
 
 }}
