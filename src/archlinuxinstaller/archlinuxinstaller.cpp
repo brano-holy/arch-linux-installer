@@ -21,6 +21,7 @@
 
 #include "archlinuxinstaller/archlinuxinstaller.hpp"
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -31,6 +32,8 @@
 #include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
+
+const std::string ArchLinuxInstaller::AUR_URL = "https://aur.archlinux.org/cgit/aur.git/snapshot/%s.tar.gz";
 
 ArchLinuxInstaller::ArchLinuxInstaller(const std::string& configPath, const std::string& programName) :
 	configPath(configPath), programName(programName), argChroot(false), argLog(false)
@@ -147,6 +150,7 @@ void ArchLinuxInstaller::loadConfig(const std::string& configPath)
 
 	if(config["users"]) users = config["users"];
 	if(config["packages"]) packages = config["packages"].as<std::vector<std::string>>();
+	if(config["aurPackages"]) aurPackages = config["aurPackages"].as<std::vector<std::string>>();
 
 	utils::SystemUtils::DEBUG = debug;
 }
@@ -174,6 +178,7 @@ int ArchLinuxInstaller::installChroot()
 	updateMkinitcpio();
 	installGrub();
 	installPackages();
+	installAurPackages();
 	createUsers();
 
 	return 0;
@@ -434,7 +439,7 @@ void ArchLinuxInstaller::installBase() const
 {
 	std::cout << "> Installing Arch Linux base..." << std::endl;
 
-	std::string basePackages = "base base-devel";
+	std::string basePackages = "base";
 	if(efi) basePackages += " efivar";
 
 	utils::SystemUtils::csystem("pacstrap /mnt " + basePackages);
@@ -534,6 +539,25 @@ void ArchLinuxInstaller::installPackages() const
 	}
 }
 
+void ArchLinuxInstaller::installAurPackages() const
+{
+	if(!aurPackages.empty())
+	{
+		std::cout << std::endl << "> Installing additional AUR packages..." << std::endl;
+		utils::SystemUtils::csystem("pacman -S --noconfirm base-devel");
+
+		std::string tempUser = "temp-archlinux-installer";
+		utils::SystemUtils::csystem("useradd -m " + tempUser);
+
+		for(const std::string& package : aurPackages)
+		{
+			installAurPackage(package, tempUser);
+		}
+
+		utils::SystemUtils::csystem("userdel -r " + tempUser);
+	}
+}
+
 void ArchLinuxInstaller::createUsers() const
 {
 	std::cout << "> Creating users..." << std::endl;
@@ -566,6 +590,59 @@ std::string ArchLinuxInstaller::getDeviceName(const YAML::Node& node, const std:
 	if(node["name"]) name += ')';
 
 	return name;
+}
+
+int ArchLinuxInstaller::installAurPackage(const std::string& packageName, const std::string& user, bool asdeps)
+{
+	std::string packagePath = "/home/" + user + '/' + packageName;
+
+	std::cout << "> Downloading AUR package '" << packageName << "'..." << std::endl;
+
+	std::string downloadCommand = "cd;";
+	downloadCommand += "wget " + utils::StringUtils::sprintf(AUR_URL, packageName.c_str()) + ';';
+	downloadCommand += "tar -xf " + packageName + ".tar.gz";
+	utils::SystemUtils::csystem("su " + user + " -c \"" + downloadCommand + '"');
+
+	std::cout << "> Searching for missing dependencies for '" << packageName << "'..." << std::endl;
+
+	std::string pkgbuildDepends = utils::SystemUtils::ssystem("grep '^depends' " + packagePath + "/PKGBUILD | sed -r 's/^depends=\\((.*)\\)$/\\1/g'");
+
+	std::vector<std::string> pacmanDepends, aurDepends;
+	std::vector<std::string> missingDepends = utils::StringUtils::split(utils::SystemUtils::ssystem("pacman -T " + pkgbuildDepends), '\n');
+	for(const std::string& pkg : missingDepends)
+	{
+		std::string pkgName = pkg.substr(0, pkg.find_first_of("><="));
+		if(utils::SystemUtils::csystem("pacman -Ss '^" + pkgName + "$'") == 0)
+		{
+			pacmanDepends.push_back('\'' + pkg + '\'');
+		}
+		else
+		{
+			aurDepends.push_back(pkgName);
+		}
+	}
+
+	std::cout << "> Installing the missing dependencies for '" << packageName << "'..." << std::endl;
+	utils::SystemUtils::csystem("pacman -Sy --noconfirm --needed --asdeps " +
+								utils::StringUtils::join(pacmanDepends.begin(), pacmanDepends.end(), ' '));
+
+	std::cout << "> Installing the missing AUR dependencies for '" << packageName << "'..." << std::endl;
+	for(const std::string& pkg : aurDepends)
+	{
+		installAurPackage(pkg, user, true);
+	}
+
+	std::cout << "> Creating AUR package '" << packageName << "'..." << std::endl;
+	std::string createCommand = "cd " + packagePath + ";makepkg";
+	utils::SystemUtils::csystem("su " + user + " -c \"" + createCommand + '"');
+
+	std::cout << "> Installing AUR package '" << packageName << "'..." << std::endl;
+	std::string params = "--noconfirm";
+	if(asdeps) params += " --asdeps";
+	int installStatus = utils::SystemUtils::csystem("pacman " + params + " -U " + packagePath + '/' + packageName + "*.pkg.tar.xz");
+	utils::SystemUtils::csystem("rm -r " + packagePath);
+
+	return installStatus;
 }
 
 MountData::MountData(const std::string& device, const std::string& dir, bool swap) :

@@ -37,6 +37,8 @@ public:
 class ArchLinuxInstaller
 {
 private:
+	static const std::string AUR_URL;
+
 	std::string configPath;
 	std::string programName;
 
@@ -72,6 +74,7 @@ private:
 
 	YAML::Node users;
 	std::vector<std::string> packages;
+	std::vector<std::string> aurPackages;
 
 	void loadArgs(int argc, char **argv);
 	void loadEfi();
@@ -99,9 +102,11 @@ private:
 	void updateMkinitcpio() const;
 	void installGrub() const;
 	void installPackages() const;
+	void installAurPackages() const;
 	void createUsers() const;
 
 	static std::string getDeviceName(const YAML::Node& node, const std::string& path = "");
+	static int installAurPackage(const std::string& packageName, const std::string& user, bool asdeps = false);
 
 public:
 	ArchLinuxInstaller(const std::string& configPath, const std::string& programName = "archlinux-installer");
