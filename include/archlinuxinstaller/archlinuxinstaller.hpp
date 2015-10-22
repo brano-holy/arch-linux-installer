@@ -38,6 +38,7 @@ class ArchLinuxInstaller
 {
 private:
 	static const std::string AUR_URL;
+	static const std::string BASE_PACKAGES;
 
 	std::string configPath;
 	std::string programName;
@@ -67,6 +68,9 @@ private:
 	std::string efiDirectory;
 	std::string grubDevice;
 	std::string grubDmname;
+
+	bool sshDecryption;
+	YAML::Node sshDecrypt;
 
 	YAML::Node devices;
 	bool rootPartition;
@@ -103,10 +107,13 @@ private:
 	void installGrub() const;
 	void installPackages() const;
 	void installAurPackages() const;
+	void installAurPackages(const std::vector<std::string>& aurPackages) const;
+	void setSshDecrypt() const;
 	void createUsers() const;
 
 	static std::string getDeviceName(const YAML::Node& node, const std::string& path = "");
 	static int installAurPackage(const std::string& packageName, const std::string& user, bool asdeps = false);
+	static void exportCertificate(const std::string& fromPath, const std::string& toPath, bool del = true);
 
 public:
 	ArchLinuxInstaller(const std::string& configPath, const std::string& programName = "archlinux-installer");

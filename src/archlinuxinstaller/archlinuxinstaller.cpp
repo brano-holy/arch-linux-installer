@@ -34,6 +34,7 @@
 namespace archlinuxinstaller {
 
 const std::string ArchLinuxInstaller::AUR_URL = "https://aur.archlinux.org/cgit/aur.git/snapshot/%s.tar.gz";
+const std::string ArchLinuxInstaller::BASE_PACKAGES = "wget";
 
 ArchLinuxInstaller::ArchLinuxInstaller(const std::string& configPath, const std::string& programName) :
 	configPath(configPath), programName(programName), argChroot(false), argLog(false)
@@ -74,6 +75,7 @@ void ArchLinuxInstaller::loadConfig(const std::string& configPath)
 	if(config["settings"]["hostname"]) hostname = config["settings"]["hostname"].as<std::string>();
 
 	encryption = false;
+	sshDecryption = false;
 	rootPartition = false;
 
 	devices = config["devices"];
@@ -130,6 +132,12 @@ void ArchLinuxInstaller::loadConfig(const std::string& configPath)
 						if(volume["filesystem"].as<std::string>("") == "swap") partitionsToMount.emplace_back(volumePath, "", true);
 					}
 				}
+
+				if(partition["encryption"]["sshDecrypt"])
+				{
+					sshDecryption = true;
+					sshDecrypt = partition["encryption"]["sshDecrypt"];
+				}
 			}
 		}
 	}
@@ -158,7 +166,7 @@ void ArchLinuxInstaller::loadConfig(const std::string& configPath)
 int ArchLinuxInstaller::installWithLog(int argc, char **argv)
 {
 	std::string cmd = utils::StringUtils::join(argv, argv + argc, ' ');
-	return utils::SystemUtils::csystem(cmd + " --log | tee log-" + programName + ".txt");
+	return utils::SystemUtils::csystem(cmd + " --log 2>&1 | tee log-" + programName + ".txt");
 }
 
 int ArchLinuxInstaller::installChroot()
@@ -175,6 +183,7 @@ int ArchLinuxInstaller::installChroot()
 
 	setHostname();
 
+	setSshDecrypt();
 	updateMkinitcpio();
 	installGrub();
 	installPackages();
@@ -439,7 +448,7 @@ void ArchLinuxInstaller::installBase() const
 {
 	std::cout << "> Installing Arch Linux base..." << std::endl;
 
-	std::string basePackages = "base";
+	std::string basePackages = "base " + BASE_PACKAGES;
 	if(efi) basePackages += " efivar";
 
 	utils::SystemUtils::csystem("pacstrap /mnt " + basePackages);
@@ -486,7 +495,18 @@ void ArchLinuxInstaller::updateMkinitcpio() const
 
 		configuration::Config mkinitcpio("/etc/mkinitcpio.conf");
 		// HOOKS="base udev autodetect modconf block filesystems keyboard fsck"
-		mkinitcpio.setValue("HOOKS", "base udev autodetect modconf block keyboard keymap consolefont encrypt lvm2 filesystems fsck shutdown");
+
+		if(sshDecryption)
+		{
+			std::string network = sshDecrypt["network"].as<std::string>();
+			std::string sshServer = sshDecrypt["sshServer"].as<std::string>();
+			mkinitcpio.setValue("HOOKS", "base udev autodetect modconf block keyboard keymap consolefont " + network + ' ' + sshServer + " encryptssh lvm2 filesystems fsck shutdown");
+		}
+		else
+		{
+			mkinitcpio.setValue("HOOKS", "base udev autodetect modconf block keyboard keymap consolefont encrypt lvm2 filesystems fsck shutdown");
+		}
+
 		mkinitcpio.save();
 
 		utils::SystemUtils::csystem("mkinitcpio -p linux");
@@ -514,7 +534,16 @@ void ArchLinuxInstaller::installGrub() const
 	if(encryption)
 	{
 		configuration::Config grubConfig("/etc/default/grub");
-		grubConfig.setValue("GRUB_CMDLINE_LINUX", "cryptdevice=" + grubDevice + ':' + grubDmname);
+
+		if(sshDecryption)
+		{
+			grubConfig.setValue("GRUB_CMDLINE_LINUX", "cryptdevice=" + grubDevice + ':' + grubDmname + " ip=" + sshDecrypt["ip"].as<std::string>());
+		}
+		else
+		{
+			grubConfig.setValue("GRUB_CMDLINE_LINUX", "cryptdevice=" + grubDevice + ':' + grubDmname);
+		}
+
 		// grubConfig.setValue("GRUB_DISABLE_SUBMENU", "y");
 		grubConfig.save();
 	}
@@ -544,7 +573,15 @@ void ArchLinuxInstaller::installAurPackages() const
 	if(!aurPackages.empty())
 	{
 		std::cout << std::endl << "> Installing additional AUR packages..." << std::endl;
-		utils::SystemUtils::csystem("pacman -S --noconfirm base-devel");
+		installAurPackages(aurPackages);
+	}
+}
+
+void ArchLinuxInstaller::installAurPackages(const std::vector<std::string>& aurPackages) const
+{
+	if(!aurPackages.empty())
+	{
+		utils::SystemUtils::csystem("pacman -S --noconfirm --needed base-devel");
 
 		std::string tempUser = "temp-archlinux-installer";
 		utils::SystemUtils::csystem("useradd -m " + tempUser);
@@ -555,6 +592,20 @@ void ArchLinuxInstaller::installAurPackages() const
 		}
 
 		utils::SystemUtils::csystem("userdel -r " + tempUser);
+	}
+}
+
+void ArchLinuxInstaller::setSshDecrypt() const
+{
+	if(sshDecryption)
+	{
+		std::vector<std::string> sshDecryptPackages;
+		sshDecryptPackages.emplace_back("mkinitcpio-" + sshDecrypt["network"].as<std::string>());
+		sshDecryptPackages.emplace_back("mkinitcpio-" + sshDecrypt["sshServer"].as<std::string>());
+		sshDecryptPackages.emplace_back("mkinitcpio-utils");
+		installAurPackages(sshDecryptPackages);
+
+		exportCertificate(sshDecrypt["sshKey"].as<std::string>(), "/etc/" + sshDecrypt["sshServer"].as<std::string>() + "/root_key");
 	}
 }
 
@@ -576,6 +627,11 @@ void ArchLinuxInstaller::createUsers() const
 		}
 
 		utils::SystemUtils::csystem("useradd" + params + ' ' + username);
+
+		if(user["createHome"].as<bool>(true) && user["sshKey"])
+		{
+			exportCertificate(user["sshKey"].as<std::string>(), "/home/" + username + "/.ssh/authorized_keys");
+		}
 	}
 }
 
@@ -643,6 +699,23 @@ int ArchLinuxInstaller::installAurPackage(const std::string& packageName, const 
 	utils::SystemUtils::csystem("rm -r " + packagePath);
 
 	return installStatus;
+}
+
+void ArchLinuxInstaller::exportCertificate(const std::string& fromPath, const std::string& toPath, bool del)
+{
+	std::string localPath = fromPath;
+	if(utils::StringUtils::startsWith(fromPath, "http://") || utils::StringUtils::startsWith(fromPath, "https://"))
+	{
+		localPath = "ssh_key.pub";
+		utils::SystemUtils::csystem("wget " + fromPath + " -O " + localPath);
+	}
+
+	std::string toPathDir = toPath.substr(0, toPath.rfind('/'));
+	utils::SystemUtils::csystem("mkdir -p " + toPathDir);
+
+	utils::SystemUtils::csystem("cat " + localPath + " > " + toPath);
+
+	if(del) utils::SystemUtils::csystem("rm " + localPath);
 }
 
 MountData::MountData(const std::string& device, const std::string& dir, bool swap) :

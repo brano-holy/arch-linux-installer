@@ -41,6 +41,7 @@ int SystemUtils::csystem(const std::string& cmd)
 		return 1;
 	}
 
+	std::cout << ">     csystem: " << cmd << std::endl;
 	return system(cmd.c_str());
 }
 
@@ -51,6 +52,8 @@ std::string SystemUtils::ssystem(const std::string& cmd, int bufferSize)
 		std::cout << ">     ssystem: " << cmd << std::endl;
 		return "";
 	}
+
+	std::cout << ">     ssystem: " << cmd << std::endl;
 
 	FILE *file = popen(cmd.c_str(), "r");
 	if(file == NULL) return "";

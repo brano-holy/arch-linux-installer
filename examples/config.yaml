@@ -49,6 +49,11 @@ devices:
                           size: rest
                           filesystem: ext4
                           mount: /
+              sshDecrypt:
+                ip: :::::eth0:dhcp
+                network: netconf # or ppp
+                sshServer: dropbear # or tinyssh
+                sshKey: https://goo.gl/OaUToD
 #        - partition:
 #            name: swap
 #            size: 1.05%RAM
@@ -74,6 +79,7 @@ users:
       name: archie
       comment: Archie Full Name
       groups: [wheel]
+      sshKey: https://goo.gl/OaUToD
 
-packages: [vim-minimal, wget, git, openssh, sudo]
+packages: [vim-minimal, wget, git, openssh, sudo, bash-completion]
 
