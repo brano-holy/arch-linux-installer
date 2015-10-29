@@ -24,15 +24,13 @@
 
 #include <yaml-cpp/yaml.h>
 
-namespace archlinuxinstaller {
+#include "archlinuxinstaller/config/devices.hpp"
+#include "archlinuxinstaller/config/settings.hpp"
+#include "archlinuxinstaller/config/user.hpp"
 
-class MountData
-{
-public:
-	std::string device, dir;
-	bool swap;
-	MountData(const std::string& device, const std::string& dir, bool swap = false);
-};
+#include "packageinstaller.hpp"
+
+namespace archlinuxinstaller {
 
 class ArchLinuxInstaller
 {
@@ -42,6 +40,8 @@ private:
 
 	std::string configPath;
 	std::string programName;
+
+	PackageInstaller packageInstaller;
 
 	std::string argProgramPath;
 	bool argChroot;
@@ -54,31 +54,15 @@ private:
 	bool keepProgram;
 	bool keepConfig;
 
-	std::string keyboard;
-	std::string font;
-	std::vector<std::string> locales;
-	std::string lang;
-	std::string timezone;
-	std::string hostname;
+	config::Devices _devices;
+	config::Settings _settings;
+	std::vector<config::User> _users;
 
-	bool encryption;
-	std::string lvmPassphrasePath;
-	std::string usersPasswordsPath;
-
-	std::string efiDirectory;
-	std::string grubDevice;
-	std::string grubDmname;
-
-	bool sshDecryption;
-	YAML::Node sshDecrypt;
-
-	YAML::Node devices;
-	bool rootPartition;
-	std::vector<MountData> partitionsToMount;
-
-	YAML::Node users;
 	std::vector<std::string> packages;
 	std::vector<std::string> aurPackages;
+
+	std::string lvmPassphrasePath;
+	std::string usersPasswordsPath;
 
 	void loadArgs(int argc, char **argv);
 	void loadEfi();
@@ -87,33 +71,23 @@ private:
 	int installWithLog(int argc, char **argv);
 	int installChroot();
 
-	void setKeyboard(bool permanent = false) const;
-	void setFont(bool permanent = false) const;
-	void setLocales() const;
-	void setLang() const;
-	void setTimezone() const;
-	void setClock() const;
-	void setHostname() const;
+	bool setClock() const;
+	bool setNetwork() const;
+	bool readPasswords();
 
-	void readPasswords();
-	void createPartitions() const;
-	void mountPartitions() const;
-	void installBase() const;
+	bool installBase() const;
 	void runChroot() const;
-	void setUsersPasswords() const;
-	void finish() const;
+	bool setUsersPasswords() const;
+	bool cleanUp() const;
 
-	void updateMkinitcpio() const;
-	void installGrub() const;
-	void installPackages() const;
-	void installAurPackages() const;
-	void installAurPackages(const std::vector<std::string>& aurPackages) const;
-	void setSshDecrypt() const;
-	void createUsers() const;
+	void afterInstall(const std::string& packageName);
 
-	static std::string getDeviceName(const YAML::Node& node, const std::string& path = "");
-	static int installAurPackage(const std::string& packageName, const std::string& user, bool asdeps = false);
-	static void exportCertificate(const std::string& fromPath, const std::string& toPath, bool del = true);
+	bool installGrub() const;
+	bool createUsers() const;
+
+	static void printTitle(const std::string& title);
+	static bool printStatus(bool status);
+	static bool printInfo(const std::string& message, bool status);
 
 public:
 	ArchLinuxInstaller(const std::string& configPath, const std::string& programName = "archlinux-installer");

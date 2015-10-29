@@ -19,35 +19,44 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_UTILS_SYSTEMUTILS_HPP
-#define ARCHLINUXINSTALLER_UTILS_SYSTEMUTILS_HPP
+#ifndef ARCHLINUXINSTALLER_CONFIG_PARTITION_HPP
+#define ARCHLINUXINSTALLER_CONFIG_PARTITION_HPP
 
-#include <string>
+#include <experimental/optional>
+
+#include <yaml-cpp/yaml.h>
+
+#include "encryption.hpp"
 
 namespace archlinuxinstaller {
-namespace utils {
+namespace config {
 
-	class SystemUtils
-	{
-	public:
-		static bool DEBUG;
+class Partition : public Volume
+{
+public:
+	std::size_t id;
 
-		static int csystem(const std::string& cmd);
-		static bool system(const std::string& cmd);
-		static std::string ssystem(const std::string& cmd, int bufferSize = 256);
+	std::string type;
+	std::experimental::optional<Encryption> encryption;
 
-		static int getRAMSize(char& unit);
-		static int alignSize(int minSize, int aligment = 2048);
+	virtual bool hasRoot() const;
+	bool hasSshDecrypt() const;
+	std::string getPrintName() const;
 
-		static std::string getSizeByCommand(std::string size, const std::string& command);
-
-		static bool createFilesystem(const std::string& filesystem, const std::string& partition);
-
-		static std::string readPassword(const std::string& passwordName);
-
-		static bool exportKey(const std::string& fromPath, const std::string& toPath, bool del = true);
-	};
+	bool create(const Device& device, const std::string& lvmPassphrasePath = "") const;
+	void fillMountables(std::vector<std::reference_wrapper<const Volume>>& mountables) const;
+};
 
 }}
 
-#endif // ARCHLINUXINSTALLER_UTILS_SYSTEMUTILS_HPP
+namespace YAML {
+
+template<>
+struct convert<archlinuxinstaller::config::Partition>
+{
+	static bool decode(Node node, archlinuxinstaller::config::Partition& partition);
+};
+
+}
+
+#endif // ARCHLINUXINSTALLER_CONFIG_PARTITION_HPP

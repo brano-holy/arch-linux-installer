@@ -28,6 +28,8 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "archlinuxinstaller/utils/stringutils.hpp"
+
 namespace archlinuxinstaller {
 namespace utils {
 
@@ -42,7 +44,12 @@ int SystemUtils::csystem(const std::string& cmd)
 	}
 
 	std::cout << ">     csystem: " << cmd << std::endl;
-	return system(cmd.c_str());
+	return ::system(cmd.c_str());
+}
+
+bool SystemUtils::system(const std::string& cmd)
+{
+	return (csystem(cmd) == 0);
 }
 
 std::string SystemUtils::ssystem(const std::string& cmd, int bufferSize)
@@ -115,13 +122,13 @@ std::string SystemUtils::getSizeByCommand(std::string size, const std::string& c
 	return size;
 }
 
-void SystemUtils::createFilesystem(const std::string& filesystem, const std::string& partition)
+bool SystemUtils::createFilesystem(const std::string& filesystem, const std::string& partition)
 {
 	std::string command;
 	if(filesystem == "swap") command = "mkswap";
 	else command = "mkfs." + filesystem;
 
-	csystem(command + ' ' + partition);
+	return SystemUtils::system(command + ' ' + partition);
 }
 
 std::string SystemUtils::readPassword(const std::string& passwordName)
@@ -151,6 +158,26 @@ std::string SystemUtils::readPassword(const std::string& passwordName)
 	tcsetattr(STDIN_FILENO, TCSANOW, &terminal);
 
 	return password;
+}
+
+bool SystemUtils::exportKey(const std::string& fromPath, const std::string& toPath, bool del)
+{
+	bool status = true;
+
+	std::string localPath = fromPath;
+	if(utils::StringUtils::startsWith(fromPath, "http://") || utils::StringUtils::startsWith(fromPath, "https://"))
+	{
+		localPath = "ssh_key.pub";
+		status &= utils::SystemUtils::system("wget " + fromPath + " -O " + localPath);
+	}
+
+	std::string toPathDir = toPath.substr(0, toPath.rfind('/'));
+	status &= utils::SystemUtils::system("mkdir -p " + toPathDir);
+	status &= utils::SystemUtils::system("cat " + localPath + " >> " + toPath);
+
+	if(del) status &= utils::SystemUtils::system("rm " + localPath);
+
+	return status;
 }
 
 }}

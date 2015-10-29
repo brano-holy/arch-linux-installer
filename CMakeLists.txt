@@ -13,7 +13,7 @@ else($ENV{DEBUG})
     add_definitions("-O3")
 endif($ENV{DEBUG})
 
-add_definitions("-std=c++11")
+add_definitions("-std=c++1y")
 add_definitions("-Wall -Wextra -pedantic")
 
 find_package(yaml-cpp)

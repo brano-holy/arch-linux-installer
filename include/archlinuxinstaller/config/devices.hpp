@@ -19,35 +19,41 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_UTILS_SYSTEMUTILS_HPP
-#define ARCHLINUXINSTALLER_UTILS_SYSTEMUTILS_HPP
+#ifndef ARCHLINUXINSTALLER_CONFIG_DEVICES_HPP
+#define ARCHLINUXINSTALLER_CONFIG_DEVICES_HPP
 
-#include <string>
+#include <vector>
+
+#include "device.hpp"
 
 namespace archlinuxinstaller {
-namespace utils {
+namespace config {
 
-	class SystemUtils
-	{
-	public:
-		static bool DEBUG;
+class Devices : public std::vector<Device>
+{
+public:
+	bool hasEncryption() const;
+	const Encryption* getEncryption() const;
 
-		static int csystem(const std::string& cmd);
-		static bool system(const std::string& cmd);
-		static std::string ssystem(const std::string& cmd, int bufferSize = 256);
+	bool hasRoot() const;
 
-		static int getRAMSize(char& unit);
-		static int alignSize(int minSize, int aligment = 2048);
+	std::string getEfiDirectory() const;
+	void getGrubParams(std::string& grubDevice, std::string& grubDmname) const;
 
-		static std::string getSizeByCommand(std::string size, const std::string& command);
-
-		static bool createFilesystem(const std::string& filesystem, const std::string& partition);
-
-		static std::string readPassword(const std::string& passwordName);
-
-		static bool exportKey(const std::string& fromPath, const std::string& toPath, bool del = true);
-	};
+	bool createPartitions(const std::string& lvmPassphrasePath = "") const;
+	bool mountPartitions() const;
+};
 
 }}
 
-#endif // ARCHLINUXINSTALLER_UTILS_SYSTEMUTILS_HPP
+namespace YAML {
+
+template<>
+struct convert<archlinuxinstaller::config::Devices>
+{
+	static bool decode(Node node, archlinuxinstaller::config::Devices& devices);
+};
+
+}
+
+#endif // ARCHLINUXINSTALLER_CONFIG_DEVICES_HPP
