@@ -1,0 +1,66 @@
+# Specification for configuration file for Arch Linux Installer.
+
+general: # General settings (optional)
+  debug: bool # Print commands, do not execute them (default false)
+  keepConfig: bool # Copy your config to the new system (default false)
+  keepProgram: bool # Copy the installer to the new system (default false)
+
+logging: # Logging (optional)
+  log: bool # Log every command output to the file (default false)
+  filename: string # Set a filename of the log file (default "log.txt")
+
+devices: # A list of devices for the partition creation (required)
+  - device: # A device (required)
+      name: string # Name of the device (optional)
+      path: string # Path of the device, e.g. "/dev/sda" (required)
+      erase: string # Erase mode "none", "zero", or "random" (required)
+      partitions: # A list of partitions (required)
+        - partition: # A partition (required)
+            name: string # Name of the partition (optional)
+            size: string # Size of the partition, e.g. "100M", "105%RAM", "rest" (required)
+            type: string # Type of the partition, e.g. "ef00", "8300" (required)
+            filesystem: string # Create filesystem, e.g. "fat", "ext4", "swap" (optional)
+            mount: string # Full path of a mount point, e.g. "/boot/efi" (optional but one root mount point is required)
+            encryption: # Encryption of the partition (required)
+              name: string # Name of the physical volume, e.g. "lvm_pv" (required)
+              hash: string # The hash used in the LUKS key setup scheme and volume key digest for luksFormat (cryptsetup --hash), e.g. "sha512" (optional)
+              keySize: int # Key size in bits (cryptsetup --key-size), e.g. 512 (optional)
+              iterTime: int # The number of milliseconds to spend with PBKDF2 passphrase processing (cryptsetup --iter-time), e.g. 1000 (optional)
+              volumeGroups: # A list of volume groups (required)
+                - volumeGroup: # A volume group (required)
+                    name: string # Name of the volume group, e.g. "lvm_vg" (required)
+                    volumes: # A list of volumes (required)
+                      - volume: # A volume (required)
+                          name: string # Name of the volume (required)
+                          size: string # Same as in the partition
+                          filesystem: string # Same as in the partition
+                          mount: string # Same as in the partition
+              sshDecrypt: # Decryption over SSH (optional)
+                ip: string # The "ip" parameter for GRUB, e.g. ":::::eth0:dhcp" (required)
+                network: string # Network HOOK for mkinitcpio "netconf", or "ppp" (required)
+                sshServer: string # SSH server "dropbear", or "tinyssh" (required)
+                sshKey: string # Path of SSH key, local path, or http (required)
+
+settings: # Custom user settings (optional)
+  keyboard: string # Keyboard layout, e.g. "cz-qwertz" (optional)
+  font: string # Console font, e.g. "Lat2-Terminus16" (optional)
+  locales: sequence<string> # List of locales, e.g. [en_US.UTF-8 UTF-8] (optional)
+  lang: string # Default language, e.g. "en_US.UTF-8" (optional)
+  timezone: string # Default timezone, e.g. "Europe/Prague" (optional)
+  hostname: string # Default hostname, e.g. "my-arch-machine" (optional)
+
+users: # A list of users (optional)
+  - user: # A user (optional)
+      name: string # Username (required)
+      comment: string # Full name of the user, e.g. "Archie Full Name" (optional)
+      crateHome: bool # Create home folder (default true)
+      groups: sequence<string> # List of groups, e.g. [wheel] (optional)
+      sshKey: string # Path of SSH key, local path, or http (optional)
+
+pacman: # Installation of additional packages (optional)
+  packages: sequence<string> # List of standard packages to be installed, e.g. [vim-minimal, wget] (optional)
+  aurPackages: sequence<string> # List of AUR packages to be installer, e.g. [packer] (optional)
+
+afterInstall: # Things to do after install (optional)
+  command: sequence<string> # List of commands to run at the end of installation (optional)
+
