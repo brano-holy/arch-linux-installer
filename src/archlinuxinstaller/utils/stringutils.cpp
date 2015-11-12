@@ -21,6 +21,7 @@
 
 #include "archlinuxinstaller/utils/stringutils.hpp"
 
+#include <iomanip>
 #include <sstream>
 
 namespace archlinuxinstaller {
@@ -51,5 +52,19 @@ std::string StringUtils::trim(const std::string& str, const std::string& whiteCh
 	return str.substr(firstPos, lastPos - firstPos + 1);
 }
 
+std::string StringUtils::formatDatetime(const tm *tmb, const std::string& fmt)
+{
+	std::stringstream ss;
+	ss << std::put_time(tmb, fmt.c_str());
+
+	return ss.str();
 }
+
+std::string StringUtils::formatNow(const std::string& fmt)
+{
+	std::time_t t = std::time(nullptr);
+	std::tm tm = *std::localtime(&t);
+	return formatDatetime(&tm, fmt);
 }
+
+}}

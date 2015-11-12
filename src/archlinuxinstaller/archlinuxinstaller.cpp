@@ -69,7 +69,7 @@ void ArchLinuxInstaller::loadConfig(const std::string& configPath)
 	keepProgram = config["keepProgram"].as<bool>(false);
 	keepConfig = config["keepConfig"].as<bool>(false);
 
-	_devices = config["devices"].as<archlinuxinstaller::config::Devices>();
+	_devices = config["devices"].as<archlinuxinstaller::modules::devices::Devices>();
 	_settings = config["settings"].as<archlinuxinstaller::config::Settings>();
 	_users = config["users"].as<std::vector<archlinuxinstaller::config::User>>();
 

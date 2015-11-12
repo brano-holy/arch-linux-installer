@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_CONFIG_VOLUME_HPP
-#define ARCHLINUXINSTALLER_CONFIG_VOLUME_HPP
+#ifndef ARCHLINUXINSTALLER_MODULES_DEVICES_VOLUME_HPP
+#define ARCHLINUXINSTALLER_MODULES_DEVICES_VOLUME_HPP
 
 #include <string>
 #include <experimental/optional>
@@ -28,7 +28,8 @@
 #include <yaml-cpp/yaml.h>
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
 
 class Device;
 class VolumeGroup;
@@ -53,26 +54,26 @@ public:
 	bool mount() const;
 	void fillMountables(std::vector<std::reference_wrapper<const Volume>>& mountables) const;
 
-	friend struct YAML::convert<archlinuxinstaller::config::Device>;
-	friend struct YAML::convert<archlinuxinstaller::config::VolumeGroup>;
+	friend struct YAML::convert<archlinuxinstaller::modules::devices::Device>;
+	friend struct YAML::convert<archlinuxinstaller::modules::devices::VolumeGroup>;
 };
 
-}}
+}}}
 
 namespace YAML {
 
 template<>
-struct convert<archlinuxinstaller::config::Device>;
+struct convert<archlinuxinstaller::modules::devices::Device>;
 
 template<>
-struct convert<archlinuxinstaller::config::VolumeGroup>;
+struct convert<archlinuxinstaller::modules::devices::VolumeGroup>;
 
 template<>
-struct convert<archlinuxinstaller::config::Volume>
+struct convert<archlinuxinstaller::modules::devices::Volume>
 {
-	static bool decode(Node node, archlinuxinstaller::config::Volume& volume);
+	static bool decode(Node node, archlinuxinstaller::modules::devices::Volume& volume);
 };
 
 }
 
-#endif // ARCHLINUXINSTALLER_CONFIG_VOLUME_HPP
+#endif // ARCHLINUXINSTALLER_MODULES_DEVICES_VOLUME_HPP

@@ -19,23 +19,32 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_CONFIG_DEVICE_HPP
-#define ARCHLINUXINSTALLER_CONFIG_DEVICE_HPP
+#ifndef ARCHLINUXINSTALLER_MODULES_DEVICES_DEVICES_HPP
+#define ARCHLINUXINSTALLER_MODULES_DEVICES_DEVICES_HPP
 
-#include "partition.hpp"
+#include "archlinuxinstaller/modules/module.hpp"
 
-#include <experimental/optional>
+#include <vector>
+
+#include "device.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
 
-class Device
+class Devices : public Module, public std::vector<Device>
 {
+protected:
+	virtual void addUserInputs(std::vector<UserInputBase*>& userInputs);
+
 public:
-	std::experimental::optional<std::string> name;
-	std::string path;
-	std::experimental::optional<std::string> erase;
-	std::vector<Partition> partitions;
+	static const double ORDER;
+
+	virtual inline double getOrder() const { return ORDER; }
+
+	virtual bool runOutsideBefore(const std::function<UIT>& ui);
+	virtual bool runOutside(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui);
+	virtual bool runOutsideAfter(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui);
 
 	bool hasEncryption() const;
 	const Encryption* getEncryption() const;
@@ -43,24 +52,22 @@ public:
 	bool hasRoot() const;
 
 	std::string getEfiDirectory() const;
+	void getGrubParams(std::string& grubDevice, std::string& grubDmname) const;
 
-	std::string getPrintName() const;
-
-	bool eraseDevice() const;
 	bool createPartitions(const std::string& lvmPassphrasePath = "") const;
-	void fillMountables(std::vector<std::reference_wrapper<const Volume>>& mountables) const;
+	bool mountPartitions() const;
 };
 
-}}
+}}}
 
 namespace YAML {
 
 template<>
-struct convert<archlinuxinstaller::config::Device>
+struct convert<archlinuxinstaller::modules::devices::Devices>
 {
-	static bool decode(Node node, archlinuxinstaller::config::Device& device);
+	static bool decode(Node node, archlinuxinstaller::modules::devices::Devices& devices);
 };
 
 }
 
-#endif // ARCHLINUXINSTALLER_CONFIG_DEVICE_HPP
+#endif // ARCHLINUXINSTALLER_MODULES_DEVICES_DEVICES_HPP

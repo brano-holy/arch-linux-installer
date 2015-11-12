@@ -19,42 +19,40 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_CONFIG_VOLUMEGROUP_HPP
-#define ARCHLINUXINSTALLER_CONFIG_VOLUMEGROUP_HPP
+#ifndef ARCHLINUXINSTALLER_MODULES_DEVICES_SSHDECRYPT_HPP
+#define ARCHLINUXINSTALLER_MODULES_DEVICES_SSHDECRYPT_HPP
 
-#include <vector>
-#include <functional>
+#include <string>
 
 #include <yaml-cpp/yaml.h>
 
-#include "volume.hpp"
+#include "archlinuxinstaller/packageinstaller.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
 
-class Encryption;
-
-class VolumeGroup
+class SshDecrypt
 {
 public:
-	std::string name;
-	std::vector<Volume> volumes;
+	std::string ip;
+	std::string network;
+	std::string sshServer;
+	std::string sshKey;
 
-	bool hasRoot() const;
-	bool create(const Encryption& encryption) const;
-	void fillMountables(std::vector<std::reference_wrapper<const Volume>>& mountables) const;
+	bool install(PackageInstaller& packageInstaller, const std::string& grubDevice = "", const std::string& grubDmname = "") const;
 };
 
-}}
+}}}
 
 namespace YAML {
 
 template<>
-struct convert<archlinuxinstaller::config::VolumeGroup>
+struct convert<archlinuxinstaller::modules::devices::SshDecrypt>
 {
-	static bool decode(Node node, archlinuxinstaller::config::VolumeGroup& volumeGroup);
+	static bool decode(const Node& node, archlinuxinstaller::modules::devices::SshDecrypt& sshDecrypt);
 };
 
 }
 
-#endif // ARCHLINUXINSTALLER_CONFIG_VOLUMEGROUP_HPP
+#endif // ARCHLINUXINSTALLER_MODULES_DEVICES_SSHDECRYPT_HPP

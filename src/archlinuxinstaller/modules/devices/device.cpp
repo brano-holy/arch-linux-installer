@@ -19,12 +19,13 @@
  *
  */
 
-#include "archlinuxinstaller/config/device.hpp"
+#include "archlinuxinstaller/modules/devices/device.hpp"
 
 #include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
 
 bool Device::hasEncryption() const
 {
@@ -90,11 +91,11 @@ void Device::fillMountables(std::vector<std::reference_wrapper<const Volume>>& m
 	for(const Partition& p : partitions) p.fillMountables(mountables);
 }
 
-}}
+}}}
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::config::Device>::decode(Node node, archlinuxinstaller::config::Device& device)
+bool convert<archlinuxinstaller::modules::devices::Device>::decode(Node node, archlinuxinstaller::modules::devices::Device& device)
 {
 	if(node["device"]) node = node["device"];
 
@@ -103,10 +104,10 @@ bool convert<archlinuxinstaller::config::Device>::decode(Node node, archlinuxins
 		if(node["name"]) device.name = node["name"].as<std::string>();
 		device.path = node["path"].as<std::string>();
 		if(node["erase"]) device.erase = node["erase"].as<std::string>();
-		device.partitions = node["partitions"].as<std::vector<archlinuxinstaller::config::Partition>>();
+		device.partitions = node["partitions"].as<std::vector<archlinuxinstaller::modules::devices::Partition>>();
 
 		size_t i = 1;
-		for(archlinuxinstaller::config::Partition& p : device.partitions)
+		for(auto& p : device.partitions)
 		{
 			p.id = i;
 			p.path = device.path + std::to_string(i);

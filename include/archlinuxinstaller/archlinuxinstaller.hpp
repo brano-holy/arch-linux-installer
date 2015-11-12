@@ -24,7 +24,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "archlinuxinstaller/config/devices.hpp"
+#include "archlinuxinstaller/modules/devices/devices.hpp"
 #include "archlinuxinstaller/config/settings.hpp"
 #include "archlinuxinstaller/config/user.hpp"
 
@@ -54,7 +54,7 @@ private:
 	bool keepProgram;
 	bool keepConfig;
 
-	config::Devices _devices;
+	modules::devices::Devices _devices;
 	config::Settings _settings;
 	std::vector<config::User> _users;
 

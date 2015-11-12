@@ -19,13 +19,14 @@
  *
  */
 
-#include "archlinuxinstaller/config/partition.hpp"
+#include "archlinuxinstaller/modules/devices/partition.hpp"
 
-#include "archlinuxinstaller/config/device.hpp"
+#include "archlinuxinstaller/modules/devices/device.hpp"
 #include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
 
 bool Partition::hasRoot() const
 {
@@ -71,19 +72,19 @@ void Partition::fillMountables(std::vector<std::reference_wrapper<const Volume>>
 	else Volume::fillMountables(mountables);
 }
 
-}}
+}}}
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::config::Partition>::decode(Node node, archlinuxinstaller::config::Partition& partition)
+bool convert<archlinuxinstaller::modules::devices::Partition>::decode(Node node, archlinuxinstaller::modules::devices::Partition& partition)
 {
 	if(node["partition"]) node = node["partition"];
 
 	if(node.IsMap())
 	{
-		YAML::convert<archlinuxinstaller::config::Volume>::decode(node, partition);
+		YAML::convert<archlinuxinstaller::modules::devices::Volume>::decode(node, partition);
 		partition.type = node["type"].as<std::string>();
-		if(node["encryption"]) partition.encryption = node["encryption"].as<archlinuxinstaller::config::Encryption>();
+		if(node["encryption"]) partition.encryption = node["encryption"].as<archlinuxinstaller::modules::devices::Encryption>();
 
 		return true;
 	}

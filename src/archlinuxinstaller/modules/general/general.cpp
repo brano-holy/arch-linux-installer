@@ -19,39 +19,33 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_CONFIG_SSHDECRYPT_HPP
-#define ARCHLINUXINSTALLER_CONFIG_SSHDECRYPT_HPP
+#include "archlinuxinstaller/modules/general/general.hpp"
 
-#include <string>
-
-#include <yaml-cpp/yaml.h>
-
-#include "archlinuxinstaller/packageinstaller.hpp"
+#include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace general {
 
-class SshDecrypt
+const double General::ORDER = 0;
+
+bool General::runOutsideBefore(const std::function<UIT>&)
 {
-public:
-	std::string ip;
-	std::string network;
-	std::string sshServer;
-	std::string sshKey;
+	utils::SystemUtils::DEBUG = debug;
+	return true;
+}
 
-	bool install(PackageInstaller& packageInstaller, const std::string& grubDevice = "", const std::string& grubDmname = "") const;
-};
-
-}}
+}}}
 
 namespace YAML {
 
-template<>
-struct convert<archlinuxinstaller::config::SshDecrypt>
+bool convert<archlinuxinstaller::modules::general::General>::decode(Node node, archlinuxinstaller::modules::general::General& general)
 {
-	static bool decode(const Node& node, archlinuxinstaller::config::SshDecrypt& sshDecrypt);
-};
+	general.debug = node["debug"].as<bool>(false);
+	general.keepConfig = node["keepConfig"].as<bool>(false);
+	general.keepProgram = node["keepProgram"].as<bool>(false);
 
+	return true;
 }
 
-#endif // ARCHLINUXINSTALLER_CONFIG_SSHDECRYPT_HPP
+}

@@ -19,14 +19,15 @@
  *
  */
 
-#include "archlinuxinstaller/config/encryption.hpp"
+#include "archlinuxinstaller/modules/devices/encryption.hpp"
 
-#include "archlinuxinstaller/config/partition.hpp"
+#include "archlinuxinstaller/modules/devices/partition.hpp"
 #include "archlinuxinstaller/configuration/config.hpp"
 #include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
 
 bool Encryption::create(const Partition& partition, const std::string& lvmPassphrasePath) const
 {
@@ -79,11 +80,11 @@ bool Encryption::install(PackageInstaller& packageInstaller, const std::string& 
 	return (statusMkinitcpio && statusGrub && statusSshDecrypt);
 }
 
-}}
+}}}
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::config::Encryption>::decode(const Node& node, archlinuxinstaller::config::Encryption& encryption)
+bool convert<archlinuxinstaller::modules::devices::Encryption>::decode(const Node& node, archlinuxinstaller::modules::devices::Encryption& encryption)
 {
 	if(node.IsMap())
 	{
@@ -93,7 +94,7 @@ bool convert<archlinuxinstaller::config::Encryption>::decode(const Node& node, a
 		if(node["keySize"]) encryption.keySize = node["keySize"].as<unsigned int>();
 		if(node["iterTime"]) encryption.iterTime = node["iterTime"].as<unsigned int>();
 
-		encryption.volumeGroups = node["volumeGroups"].as<std::vector<archlinuxinstaller::config::VolumeGroup>>();
+		encryption.volumeGroups = node["volumeGroups"].as<std::vector<archlinuxinstaller::modules::devices::VolumeGroup>>();
 
 		return true;
 	}

@@ -19,14 +19,61 @@
  *
  */
 
-#include "archlinuxinstaller/config/devices.hpp"
+#include "archlinuxinstaller/modules/devices/devices.hpp"
 
 #include <functional>
+#include <fstream>
 
+#include "archlinuxinstaller/modules/userinput.hpp"
 #include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
+
+const double Devices::ORDER = 0.1;
+
+void Devices::addUserInputs(std::vector<UserInputBase*>& userInputs)
+{
+	if(hasEncryption())
+	{
+		userInputs.push_back(new UserInput<std::string>("lvm-passphrase", "LVM Passphrase", UserInputType::Password));
+	}
+
+	//userInputs.push_back(new UserInput<std::string>("root-password", "UNIX password for user 'root'", UserInputType::Password));
+}
+
+bool Devices::runOutsideBefore(const std::function<UIT>& ui)
+{
+	return ui("Looking for the root partition", hasRoot());
+}
+
+bool Devices::runOutside(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui)
+{
+	std::string lvmPassphrasePath;
+	if(hasEncryption())
+	{
+		lvmPassphrasePath = "devices-lvm-passphrase-" + Module::PROGRAM_NAME + ".txt";
+		std::ofstream lvmPassphraseFile(lvmPassphrasePath);
+		lvmPassphraseFile << *userInputs.at("lvm-passphrase");
+	}
+
+	bool status = ui("Creating partitions", createPartitions(lvmPassphrasePath));
+	status &= ui("Mounting partitions", mountPartitions());
+
+	return status;
+}
+
+bool Devices::runOutsideAfter(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui)
+{
+	/*
+	std::string usersPasswordsPath = "devices-root-password-" + Module::PROGRAM_NAME + ".txt";
+	std::ofstream usersPasswordsFile(usersPasswordsPath);
+	usersPasswordsFile << "root:" << *userInputs.at("root-password") << std::endl;
+	*/
+
+	return ui("Setting root password", false);
+}
 
 bool Devices::hasEncryption() const
 {
@@ -112,19 +159,19 @@ bool Devices::mountPartitions() const
 	return std::all_of(mountables.begin(), mountables.end(), [](const Volume& v) { return v.mount(); });
 }
 
-}}
+}}}
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::config::Devices>::decode(Node node, archlinuxinstaller::config::Devices& devices)
+bool convert<archlinuxinstaller::modules::devices::Devices>::decode(Node node, archlinuxinstaller::modules::devices::Devices& devices)
 {
 	if(node.IsSequence())
 	{
-		YAML::convert<std::vector<archlinuxinstaller::config::Device>>::decode(node, devices);
+		YAML::convert<std::vector<archlinuxinstaller::modules::devices::Device>>::decode(node, devices);
 		return true;
 	}
 
-	return false;
+	return true;
 }
 
 }

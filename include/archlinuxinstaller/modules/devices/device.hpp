@@ -19,44 +19,49 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_CONFIG_PARTITION_HPP
-#define ARCHLINUXINSTALLER_CONFIG_PARTITION_HPP
+#ifndef ARCHLINUXINSTALLER_MODULES_DEVICES_DEVICE_HPP
+#define ARCHLINUXINSTALLER_MODULES_DEVICES_DEVICE_HPP
+
+#include "partition.hpp"
 
 #include <experimental/optional>
 
-#include <yaml-cpp/yaml.h>
-
-#include "encryption.hpp"
-
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
 
-class Partition : public Volume
+class Device
 {
 public:
-	std::size_t id;
+	std::experimental::optional<std::string> name;
+	std::string path;
+	std::experimental::optional<std::string> erase;
+	std::vector<Partition> partitions;
 
-	std::string type;
-	std::experimental::optional<Encryption> encryption;
+	bool hasEncryption() const;
+	const Encryption* getEncryption() const;
 
-	virtual bool hasRoot() const;
-	bool hasSshDecrypt() const;
+	bool hasRoot() const;
+
+	std::string getEfiDirectory() const;
+
 	std::string getPrintName() const;
 
-	bool create(const Device& device, const std::string& lvmPassphrasePath = "") const;
+	bool eraseDevice() const;
+	bool createPartitions(const std::string& lvmPassphrasePath = "") const;
 	void fillMountables(std::vector<std::reference_wrapper<const Volume>>& mountables) const;
 };
 
-}}
+}}}
 
 namespace YAML {
 
 template<>
-struct convert<archlinuxinstaller::config::Partition>
+struct convert<archlinuxinstaller::modules::devices::Device>
 {
-	static bool decode(Node node, archlinuxinstaller::config::Partition& partition);
+	static bool decode(Node node, archlinuxinstaller::modules::devices::Device& device);
 };
 
 }
 
-#endif // ARCHLINUXINSTALLER_CONFIG_PARTITION_HPP
+#endif // ARCHLINUXINSTALLER_MODULES_DEVICES_DEVICE_HPP

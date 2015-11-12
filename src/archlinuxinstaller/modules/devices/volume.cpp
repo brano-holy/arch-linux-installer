@@ -19,13 +19,14 @@
  *
  */
 
-#include "archlinuxinstaller/config/volume.hpp"
+#include "archlinuxinstaller/modules/devices/volume.hpp"
 
-#include "archlinuxinstaller/config/volumegroup.hpp"
+#include "archlinuxinstaller/modules/devices/volumegroup.hpp"
 #include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
 
 bool Volume::hasRoot() const
 {
@@ -73,11 +74,11 @@ void Volume::fillMountables(std::vector<std::reference_wrapper<const Volume>>& m
 	if(isMountable()) mountables.push_back(*this);
 }
 
-}}
+}}}
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::config::Volume>::decode(Node node, archlinuxinstaller::config::Volume& volume)
+bool convert<archlinuxinstaller::modules::devices::Volume>::decode(Node node, archlinuxinstaller::modules::devices::Volume& volume)
 {
 	if(node["volume"]) node = node["volume"];
 

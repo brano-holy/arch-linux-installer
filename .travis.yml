@@ -5,8 +5,8 @@ language: cpp
 compiler: gcc
 
 before_install:
-  - export CXX="g++-4.9"
-  - g++-4.9 --version
+  - export CXX="g++-5"
+  - g++-5 --version
   - cd ~
   - rm -rf libs/
   - mkdir libs && cd libs
@@ -35,5 +35,5 @@ addons:
       - ubuntu-toolchain-r-test
       - boost-latest
     packages:
-      - g++-4.9
+      - g++-5
       - libboost1.55-dev

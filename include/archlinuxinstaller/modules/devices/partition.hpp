@@ -19,49 +19,45 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_CONFIG_ENCRYPTION_HPP
-#define ARCHLINUXINSTALLER_CONFIG_ENCRYPTION_HPP
+#ifndef ARCHLINUXINSTALLER_MODULES_DEVICES_PARTITION_HPP
+#define ARCHLINUXINSTALLER_MODULES_DEVICES_PARTITION_HPP
 
 #include <experimental/optional>
 
 #include <yaml-cpp/yaml.h>
 
-#include "sshdecrypt.hpp"
-#include "volumegroup.hpp"
+#include "encryption.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
 
-class Partition;
-
-class Encryption
+class Partition : public Volume
 {
 public:
-	std::string name;
+	std::size_t id;
 
-	std::experimental::optional<std::string> hash;
-	std::experimental::optional<unsigned int> keySize;
-	std::experimental::optional<unsigned int> iterTime;
+	std::string type;
+	std::experimental::optional<Encryption> encryption;
 
-	std::vector<VolumeGroup> volumeGroups;
-	std::experimental::optional<SshDecrypt> sshDecrypt;
+	virtual bool hasRoot() const;
+	bool hasSshDecrypt() const;
+	std::string getPrintName() const;
 
-	bool create(const Partition& partition, const std::string& lvmPassphrasePath) const;
+	bool create(const Device& device, const std::string& lvmPassphrasePath = "") const;
 	void fillMountables(std::vector<std::reference_wrapper<const Volume>>& mountables) const;
-
-	bool install(PackageInstaller& packageInstaller, const std::string& grubDevice = "", const std::string& grubDmname = "") const;
 };
 
-}}
+}}}
 
 namespace YAML {
 
 template<>
-struct convert<archlinuxinstaller::config::Encryption>
+struct convert<archlinuxinstaller::modules::devices::Partition>
 {
-	static bool decode(const Node& node, archlinuxinstaller::config::Encryption& encryption);
+	static bool decode(Node node, archlinuxinstaller::modules::devices::Partition& partition);
 };
 
 }
 
-#endif // ARCHLINUXINSTALLER_CONFIG_ENCRYPTION_HPP
+#endif // ARCHLINUXINSTALLER_MODULES_DEVICES_PARTITION_HPP

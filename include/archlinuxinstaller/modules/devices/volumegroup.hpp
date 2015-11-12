@@ -19,41 +19,43 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_CONFIG_DEVICES_HPP
-#define ARCHLINUXINSTALLER_CONFIG_DEVICES_HPP
+#ifndef ARCHLINUXINSTALLER_MODULES_DEVICES_VOLUMEGROUP_HPP
+#define ARCHLINUXINSTALLER_MODULES_DEVICES_VOLUMEGROUP_HPP
 
 #include <vector>
+#include <functional>
 
-#include "device.hpp"
+#include <yaml-cpp/yaml.h>
+
+#include "volume.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
 
-class Devices : public std::vector<Device>
+class Encryption;
+
+class VolumeGroup
 {
 public:
-	bool hasEncryption() const;
-	const Encryption* getEncryption() const;
+	std::string name;
+	std::vector<Volume> volumes;
 
 	bool hasRoot() const;
-
-	std::string getEfiDirectory() const;
-	void getGrubParams(std::string& grubDevice, std::string& grubDmname) const;
-
-	bool createPartitions(const std::string& lvmPassphrasePath = "") const;
-	bool mountPartitions() const;
+	bool create(const Encryption& encryption) const;
+	void fillMountables(std::vector<std::reference_wrapper<const Volume>>& mountables) const;
 };
 
-}}
+}}}
 
 namespace YAML {
 
 template<>
-struct convert<archlinuxinstaller::config::Devices>
+struct convert<archlinuxinstaller::modules::devices::VolumeGroup>
 {
-	static bool decode(Node node, archlinuxinstaller::config::Devices& devices);
+	static bool decode(Node node, archlinuxinstaller::modules::devices::VolumeGroup& volumeGroup);
 };
 
 }
 
-#endif // ARCHLINUXINSTALLER_CONFIG_DEVICES_HPP
+#endif // ARCHLINUXINSTALLER_MODULES_DEVICES_VOLUMEGROUP_HPP

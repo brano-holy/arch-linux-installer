@@ -92,11 +92,11 @@ This module formats selected devices. You can specify more devices in a sequence
 
         * keySize: `int` <sup>`optional`</sup>
 
-          Sets key size in bits (e.g. `512`). The argument has to be a multiple of 8. The possible key-sizes  are limited by the cipher and mode used. It is the `--key-size` parameter in the `cryptsetup` utility. IF it is not specified, the default `--key-size` option of the `cryptsetup` utility is used.
+          Sets key size in bits (e.g. `512`). The argument has to be a multiple of 8. The possible key-sizes  are limited by the cipher and mode used. It is the `--key-size` parameter in the `cryptsetup` utility. If it is not specified, the default `--key-size` option of the `cryptsetup` utility is used.
 
         * iterTime: `int` <sup>`optional`</sup>
 
-          The number of milliseconds to spend with PBKDF2 passphrase processing (e.g. `1000`). It is the `--iter-time` parameter in the `cryptsetup` utility. IF it is not specified, the default `--iter-time` option of the `cryptsetup` utility is used. Specifying 0 as parameter selects the compiled-in default (of `cryptsetup`).
+          The number of milliseconds to spend with PBKDF2 passphrase processing (e.g. `1000`). It is the `--iter-time` parameter in the `cryptsetup` utility. If it is not specified, the default `--iter-time` option of the `cryptsetup` utility is used. Specifying 0 as parameter selects the compiled-in default (of `cryptsetup`).
 
         * **volumeGroups**: `sequence<volumeGroup>` <sup>`required`</sup>
 
@@ -220,5 +220,5 @@ The `afterInstall` module can be used to run any command you want when the insta
 **Properties:**
 * commands: `sequence<string>` <sup>`optional`</sup>
 
-  A list of command to run.n at the end of installation (optional)
+  A list of commands to run in newly installed system at the end of the installation.
 

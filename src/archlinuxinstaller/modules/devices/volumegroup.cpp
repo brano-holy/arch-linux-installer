@@ -19,13 +19,14 @@
  *
  */
 
-#include "archlinuxinstaller/config/volumegroup.hpp"
+#include "archlinuxinstaller/modules/devices/volumegroup.hpp"
 
-#include "archlinuxinstaller/config/encryption.hpp"
+#include "archlinuxinstaller/modules/devices/encryption.hpp"
 #include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
 
 bool VolumeGroup::hasRoot() const
 {
@@ -45,20 +46,20 @@ void VolumeGroup::fillMountables(std::vector<std::reference_wrapper<const Volume
 	for(const Volume& v : volumes) v.fillMountables(mountables);
 }
 
-}}
+}}}
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::config::VolumeGroup>::decode(Node node, archlinuxinstaller::config::VolumeGroup& volumeGroup)
+bool convert<archlinuxinstaller::modules::devices::VolumeGroup>::decode(Node node, archlinuxinstaller::modules::devices::VolumeGroup& volumeGroup)
 {
 	if(node["volumeGroup"]) node = node["volumeGroup"];
 
 	if(node.IsMap())
 	{
 		volumeGroup.name = node["name"].as<std::string>();
-		volumeGroup.volumes = node["volumes"].as<std::vector<archlinuxinstaller::config::Volume>>();
+		volumeGroup.volumes = node["volumes"].as<std::vector<archlinuxinstaller::modules::devices::Volume>>();
 
-		for(archlinuxinstaller::config::Volume& v : volumeGroup.volumes)
+		for(auto& v : volumeGroup.volumes)
 		{
 			v.path = "/dev/" + volumeGroup.name + '/' + v.name;
 		}

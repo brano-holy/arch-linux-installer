@@ -23,6 +23,7 @@
 #define ARCHLINUXINSTALLER_UTILS_STRINGUTILS_HPP
 
 #include <cstdio>
+#include <ctime>
 #include <string>
 #include <vector>
 
@@ -42,6 +43,9 @@ public:
 
 	template<typename... Args>
 	static std::string sprintf(const std::string& command, Args... params);
+
+	static std::string formatDatetime(const std::tm *tmb, const std::string& fmt);
+	static std::string formatNow(const std::string& fmt);
 };
 
 template <typename ForwardIterator, typename GlueT>

@@ -19,12 +19,13 @@
  *
  */
 
-#include "archlinuxinstaller/config/sshdecrypt.hpp"
+#include "archlinuxinstaller/modules/devices/sshdecrypt.hpp"
 
 #include "archlinuxinstaller/configuration/config.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace devices {
 
 bool SshDecrypt::install(PackageInstaller& packageInstaller, const std::string& grubDevice, const std::string& grubDmname) const
 {
@@ -60,11 +61,11 @@ bool SshDecrypt::install(PackageInstaller& packageInstaller, const std::string& 
 	return (status && statusMkinitcpio && statusGrub && statusKey);
 }
 
-}}
+}}}
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::config::SshDecrypt>::decode(const Node& node, archlinuxinstaller::config::SshDecrypt& sshDecrypt)
+bool convert<archlinuxinstaller::modules::devices::SshDecrypt>::decode(const Node& node, archlinuxinstaller::modules::devices::SshDecrypt& sshDecrypt)
 {
 	if(node.IsMap())
 	{
