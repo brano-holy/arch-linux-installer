@@ -36,4 +36,6 @@ addons:
       - boost-latest
     packages:
       - g++-5
-      - libboost1.55-dev
+      - libboost-filesystem1.55-dev
+      - libboost-iostreams1.55-dev
+
