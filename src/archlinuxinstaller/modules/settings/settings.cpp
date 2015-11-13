@@ -19,12 +19,35 @@
  *
  */
 
-#include "archlinuxinstaller/config/settings.hpp"
+#include "archlinuxinstaller/modules/settings/settings.hpp"
 
 #include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace settings {
+
+const double Settings::ORDER = 0.2;
+
+bool Settings::runOutsideBefore(const std::function<UIT>& ui)
+{
+	bool status = ui("Setting keyboard", setKeyboard());
+	status &= ui("Setting font", setFont());
+
+	return status;
+}
+
+bool Settings::runInside(const std::function<UIT>& ui)
+{
+	bool status = ui("Setting keyboard", setKeyboard());
+	status &= ui("Setting font", setFont());
+	status &= ui("Setting locales", setLocales());
+	status &= ui("Setting lang", setLang());
+	status &= ui("Setting timezone", setTimezone());
+	status &= ui("Setting hostname", setHostname());
+
+	return status;
+}
 
 bool Settings::setKeyboard(bool permanent) const
 {
@@ -87,11 +110,11 @@ bool Settings::setHostname() const
 	return utils::SystemUtils::system("echo " + *hostname + " > /etc/hostname");
 }
 
-}}
+}}}
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::config::Settings>::decode(const Node& node, archlinuxinstaller::config::Settings& settings)
+bool convert<archlinuxinstaller::modules::settings::Settings>::decode(Node node, archlinuxinstaller::modules::settings::Settings& settings)
 {
 	if(node.IsMap())
 	{

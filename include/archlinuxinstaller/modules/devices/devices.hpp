@@ -44,7 +44,6 @@ public:
 
 	virtual bool runOutsideBefore(const std::function<UIT>& ui);
 	virtual bool runOutside(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui);
-	virtual bool runOutsideAfter(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui);
 
 	bool hasEncryption() const;
 	const Encryption* getEncryption() const;

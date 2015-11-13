@@ -36,6 +36,7 @@ namespace configuration {
 	public:
 		VarConfigLine();
 		VarConfigLine(const std::string& name);
+		virtual ~VarConfigLine() = default;
 
 		virtual void parseLine(const std::string& line);
 		virtual void writeLine(std::ostream& out) const;

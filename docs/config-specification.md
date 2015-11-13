@@ -140,9 +140,9 @@ This module formats selected devices. You can specify more devices in a sequence
 
             An SSH server in initrd. You have the option of using either `dropbear` or `tinyssh`.
 
-          * **sshKey**: `string` <sup>`required`</sup>
+          * **authorizedKeys**: `sequence<string>` <sup>`required`</sup>
 
-            A path to the SSH public key that will be used to decrypt the partition over SSH. It can be a local path (if you downloaded your key before installation) or http(s) address where the key can be downloaded from.
+            A list of paths to the SSH public keys that will be used to decrypt the partition over SSH. The path can be a local path (if you downloaded your key before installation) or http(s) address where the key can be downloaded from.
 
 
 ### Module `settings` <sup><sub><sup>`optional`</sup></sub></sup>
@@ -196,9 +196,9 @@ This module specifies a list of additional users. The `root` user is created (an
 
     The `--groups` parameter of the `useradd` utility (e.g. `[wheel, ssh, irc]`). A list of supplementary groups which the user is also a member of.
 
-  * sshKey: `string` <sup>`optional`</sup>
+  * authorizedKeys: `sequence<string>` <sup>`optional`</sup>
 
-    A path to the SSH public key that will be used to decrypt the partition over SSH. It can be a local path (if you downloaded your key before installation) or http(s) address where the key can be downloaded from.
+    A list of paths to the SSH public keys that will be used for SSH access. The path can be a local path (if you downloaded your keys before installation) or http(s) address where the key can be downloaded from.
 
 
 ### Module `pacman` <sup><sub><sup>`optional`</sup></sub></sup>
@@ -212,13 +212,4 @@ This module is used to install additional packages from the default repositories
 * aurPackages: `sequence<string>` <sup>`optional`</sup>
 
   A list of AUR packages to isntall. No AUR helper is required but you can install it (e.g. `[packer]`).
-
-
-### Module `afterInstall` <sup><sub><sup>`optional`</sup></sub></sup>
-The `afterInstall` module can be used to run any command you want when the installation is finished.
-
-**Properties:**
-* commands: `sequence<string>` <sup>`optional`</sup>
-
-  A list of commands to run in newly installed system at the end of the installation.
 

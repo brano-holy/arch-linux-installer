@@ -19,27 +19,32 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_CONFIG_SETTINGS_HPP
-#define ARCHLINUXINSTALLER_CONFIG_SETTINGS_HPP
+#ifndef ARCHLINUXINSTALLER_MODULES_SETTINGS_SETTINGS_HPP
+#define ARCHLINUXINSTALLER_MODULES_SETTINGS_SETTINGS_HPP
 
-#include <string>
+#include "archlinuxinstaller/modules/module.hpp"
+
 #include <experimental/optional>
-#include <vector>
-
-#include <yaml-cpp/yaml.h>
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace settings {
 
-class Settings
+class Settings : public Module
 {
 public:
+	static const double ORDER;
+
 	std::experimental::optional<std::string> keyboard;
 	std::experimental::optional<std::string> font;
 	std::vector<std::string> locales;
 	std::experimental::optional<std::string> lang;
 	std::experimental::optional<std::string> timezone;
 	std::experimental::optional<std::string> hostname;
+
+	virtual inline double getOrder() const { return ORDER; }
+	virtual bool runOutsideBefore(const std::function<UIT>& ui);
+	virtual bool runInside(const std::function<UIT>& ui);
 
 	bool setKeyboard(bool permanent = false) const;
 	bool setFont(bool permanent = false) const;
@@ -49,16 +54,16 @@ public:
 	bool setHostname() const;
 };
 
-}}
+}}}
 
 namespace YAML {
 
 template<>
-struct convert<archlinuxinstaller::config::Settings>
+struct convert<archlinuxinstaller::modules::settings::Settings>
 {
-	static bool decode(const Node& node, archlinuxinstaller::config::Settings& settings);
+	static bool decode(Node node, archlinuxinstaller::modules::settings::Settings& settings);
 };
 
 }
 
-#endif // ARCHLINUXINSTALLER_CONFIG_SETTINGS_HPP
+#endif // ARCHLINUXINSTALLER_MODULES_SETTINGS_SETTINGS_HPP

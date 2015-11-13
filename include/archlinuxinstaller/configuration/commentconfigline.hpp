@@ -35,6 +35,7 @@ namespace configuration {
 
 	public:
 		CommentConfigLine();
+		virtual ~CommentConfigLine() = default;
 
 		virtual void parseLine(const std::string& line);
 		virtual void writeLine(std::ostream& out) const;

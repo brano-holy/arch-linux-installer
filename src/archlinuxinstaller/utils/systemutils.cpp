@@ -28,7 +28,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "archlinuxinstaller/utils/stringutils.hpp"
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace archlinuxinstaller {
 namespace utils {
@@ -165,7 +165,7 @@ bool SystemUtils::exportKey(const std::string& fromPath, const std::string& toPa
 	bool status = true;
 
 	std::string localPath = fromPath;
-	if(utils::StringUtils::startsWith(fromPath, "http://") || utils::StringUtils::startsWith(fromPath, "https://"))
+	if(boost::algorithm::starts_with(fromPath, "http://") || boost::algorithm::starts_with(fromPath, "https://"))
 	{
 		localPath = "ssh_key.pub";
 		status &= utils::SystemUtils::system("wget " + fromPath + " -O " + localPath);

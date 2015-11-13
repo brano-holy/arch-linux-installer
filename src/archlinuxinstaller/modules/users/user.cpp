@@ -19,26 +19,28 @@
  *
  */
 
-#include "archlinuxinstaller/config/user.hpp"
+#include "archlinuxinstaller/modules/users/user.hpp"
 
-#include "archlinuxinstaller/utils/stringutils.hpp"
+#include <boost/algorithm/string/join.hpp>
+
 #include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace users {
 
 bool User::create() const
 {
 	std::string params;
 	if(createHome) params += " -m";
 	if(comment) params += " -c \"" + *comment + '"';
-	if(!groups.empty()) params += " -G " + utils::StringUtils::join(groups.begin(), groups.end(), ',');
+	if(!groups.empty()) params += " -G " + boost::algorithm::join(groups, ",");
 
 	bool status = utils::SystemUtils::system("useradd" + params + ' ' + name);
 
 	if(createHome)
 	{
-		for(const std::string& key : sshKeys)
+		for(const std::string& key : authorizedKeys)
 		{
 			status &= utils::SystemUtils::exportKey(key, "/home/" + name + "/.ssh/authorized_keys");
 		}
@@ -47,11 +49,11 @@ bool User::create() const
 	return status;
 }
 
-}}
+}}}
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::config::User>::decode(Node node, archlinuxinstaller::config::User& user)
+bool convert<archlinuxinstaller::modules::users::User>::decode(Node node, archlinuxinstaller::modules::users::User& user)
 {
 	if(node["user"]) node = node["user"];
 
@@ -61,7 +63,7 @@ bool convert<archlinuxinstaller::config::User>::decode(Node node, archlinuxinsta
 		if(node["comment"]) user.comment = node["comment"].as<std::string>();
 		user.createHome = node["createHome"].as<bool>(true);
 		if(node["groups"]) user.groups = node["groups"].as<std::vector<std::string>>();
-		if(node["sshKeys"]) user.sshKeys = node["sshKeys"].as<std::vector<std::string>>();
+		if(node["authorizedKeys"]) user.authorizedKeys = node["authorizedKeys"].as<std::vector<std::string>>();
 
 		return true;
 	}

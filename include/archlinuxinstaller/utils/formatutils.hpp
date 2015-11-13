@@ -19,26 +19,22 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_CONFIGURATION_TEXTCONFIGLINE_HPP
-#define ARCHLINUXINSTALLER_CONFIGURATION_TEXTCONFIGLINE_HPP
+#ifndef ARCHLINUXINSTALLER_UTILS_FORMATUTILS_HPP
+#define ARCHLINUXINSTALLER_UTILS_FORMATUTILS_HPP
 
-#include "configline.hpp"
+#include <ctime>
+#include <string>
 
 namespace archlinuxinstaller {
-namespace configuration {
+namespace utils {
 
-	class TextConfigLine : public ConfigLine
-	{
-	protected:
-		std::string line;
-
-	public:
-		virtual ~TextConfigLine() = default;
-
-		virtual void parseLine(const std::string& line);
-		virtual void writeLine(std::ostream& out) const;
-	};
+class FormatUtils
+{
+public:
+	static std::string formatDatetime(const std::tm *tmb, const std::string& fmt);
+	static std::string formatNow(const std::string& fmt);
+};
 
 }}
 
-#endif // ARCHLINUXINSTALLER_CONFIGURATION_TEXTCONFIGLINE_HPP
+#endif // ARCHLINUXINSTALLER_UTILS_FORMATUTILS_HPP

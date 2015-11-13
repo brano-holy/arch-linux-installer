@@ -19,30 +19,37 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_UTILS_MEMUTILS_HPP
-#define ARCHLINUXINSTALLER_UTILS_MEMUTILS_HPP
+#ifndef ARCHLINUXINSTALLER_MODULES_PACMAN_PACMAN_HPP
+#define ARCHLINUXINSTALLER_MODULES_PACMAN_PACMAN_HPP
 
-#include <vector>
+#include "archlinuxinstaller/modules/module.hpp"
 
 namespace archlinuxinstaller {
-namespace utils {
+namespace modules {
+namespace pacman {
 
-	class MemUtils
-	{
-	public:
-		template<typename T>
-		static void deleteVector(const std::vector<T>& data);
-	};
+class Pacman : public Module
+{
+public:
+	static const double ORDER;
 
-	template<typename T>
-	void MemUtils::deleteVector(const std::vector<T>& data)
-	{
-		for(const T& item : data)
-		{
-			delete item;
-		}
-	}
+	std::vector<std::string> packages;
+	std::vector<std::string> aurPackages;
 
-}}
+	virtual inline double getOrder() const { return ORDER; }
+	virtual bool runInside(const std::function<UIT>& ui);
+};
 
-#endif // ARCHLINUXINSTALLER_UTILS_MEMUTILS_HPP
+}}}
+
+namespace YAML {
+
+template<>
+struct convert<archlinuxinstaller::modules::pacman::Pacman>
+{
+	static bool decode(Node node, archlinuxinstaller::modules::pacman::Pacman& pacman);
+};
+
+}
+
+#endif // ARCHLINUXINSTALLER_MODULES_PACMAN_PACMAN_HPP

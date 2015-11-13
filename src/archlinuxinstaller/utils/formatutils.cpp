@@ -19,7 +19,7 @@
  *
  */
 
-#include "archlinuxinstaller/utils/stringutils.hpp"
+#include "archlinuxinstaller/utils/formatutils.hpp"
 
 #include <iomanip>
 #include <sstream>
@@ -27,32 +27,7 @@
 namespace archlinuxinstaller {
 namespace utils {
 
-bool StringUtils::startsWith(const std::string& str, const std::string& prefix)
-{
-	return (str.substr(0, prefix.length()) == prefix);
-}
-
-std::vector<std::string> StringUtils::split(const std::string& str, char delim)
-{
-	std::vector<std::string> parts;
-	std::istringstream iss(str);
-
-	std::string part;
-	while(std::getline(iss, part, delim)) parts.push_back(part);
-
-	return parts;
-}
-
-std::string StringUtils::trim(const std::string& str, const std::string& whiteChars)
-{
-	std::size_t firstPos = str.find_first_not_of(whiteChars);
-	if(firstPos == std::string::npos) return "";
-
-	std::size_t lastPos = str.find_last_not_of(whiteChars);
-	return str.substr(firstPos, lastPos - firstPos + 1);
-}
-
-std::string StringUtils::formatDatetime(const tm *tmb, const std::string& fmt)
+std::string FormatUtils::formatDatetime(const tm *tmb, const std::string& fmt)
 {
 	std::stringstream ss;
 	ss << std::put_time(tmb, fmt.c_str());
@@ -60,7 +35,7 @@ std::string StringUtils::formatDatetime(const tm *tmb, const std::string& fmt)
 	return ss.str();
 }
 
-std::string StringUtils::formatNow(const std::string& fmt)
+std::string FormatUtils::formatNow(const std::string& fmt)
 {
 	std::time_t t = std::time(nullptr);
 	std::tm tm = *std::localtime(&t);

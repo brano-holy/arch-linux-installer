@@ -39,7 +39,7 @@ devices: # A list of devices for the partition creation (required)
                 ip: string # The "ip" parameter for GRUB, e.g. ":::::eth0:dhcp" (required)
                 network: string # Network HOOK for mkinitcpio "netconf", or "ppp" (required)
                 sshServer: string # SSH server "dropbear", or "tinyssh" (required)
-                sshKey: string # Path of SSH key, local path, or http (required)
+                authorizedKeys: sequence<string> # Paths of SSH keys, local or remote paths (required)
 
 settings: # Custom user settings (optional)
   keyboard: string # Keyboard layout, e.g. "cz-qwertz" (optional)
@@ -55,12 +55,9 @@ users: # A list of users (optional)
       comment: string # Full name of the user, e.g. "Archie Full Name" (optional)
       crateHome: bool # Create home folder (default true)
       groups: sequence<string> # List of groups, e.g. [wheel] (optional)
-      sshKey: string # Path of SSH key, local path, or http (optional)
+      authorizedKeys: sequence<string> # Paths of SSH keys, local or remote paths (optional)
 
 pacman: # Installation of additional packages (optional)
   packages: sequence<string> # List of standard packages to be installed, e.g. [vim-minimal, wget] (optional)
   aurPackages: sequence<string> # List of AUR packages to be installer, e.g. [packer] (optional)
-
-afterInstall: # Things to do after install (optional)
-  commands: sequence<string> # List of commands to run at the end of installation (optional)
 

@@ -26,9 +26,9 @@
 #include <fstream>
 #include <iostream>
 
-#include "archlinuxinstaller/configuration/config.hpp"
+#include <boost/algorithm/string/trim.hpp>
 
-#include "archlinuxinstaller/utils/stringutils.hpp"
+#include "archlinuxinstaller/configuration/config.hpp"
 #include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
@@ -70,8 +70,8 @@ void ArchLinuxInstaller::loadConfig(const std::string& configPath)
 	keepConfig = config["keepConfig"].as<bool>(false);
 
 	_devices = config["devices"].as<archlinuxinstaller::modules::devices::Devices>();
-	_settings = config["settings"].as<archlinuxinstaller::config::Settings>();
-	_users = config["users"].as<std::vector<archlinuxinstaller::config::User>>();
+	_settings = config["settings"].as<archlinuxinstaller::modules::settings::Settings>();
+	_users = config["users"].as<std::vector<archlinuxinstaller::modules::users::User>>();
 
 	if(config["packages"]) packages = config["packages"].as<std::vector<std::string>>();
 	if(config["aurPackages"]) aurPackages = config["aurPackages"].as<std::vector<std::string>>();
@@ -79,9 +79,9 @@ void ArchLinuxInstaller::loadConfig(const std::string& configPath)
 	utils::SystemUtils::DEBUG = debug;
 }
 
-int ArchLinuxInstaller::installWithLog(int argc, char **argv)
+int ArchLinuxInstaller::installWithLog(int, char **)
 {
-	std::string cmd = utils::StringUtils::join(argv, argv + argc, ' ');
+	std::string cmd = ""; // utils::StringUtils::join(argv, argv + argc, ' ');
 	return utils::SystemUtils::csystem(cmd + " --log 2>&1 | tee log-" + programName + ".txt");
 }
 
@@ -198,7 +198,7 @@ bool ArchLinuxInstaller::readPasswords()
 		usersPasswordsFile << "root:" << utils::SystemUtils::readPassword("UNIX password for user 'root'") << std::endl;
 		std::cout << std::endl;
 
-		for(const config::User& user : _users)
+		for(const modules::users::User& user : _users)
 		{
 			std::string password = utils::SystemUtils::readPassword("UNIX password for user '" + user.name + '\'');
 
@@ -266,7 +266,7 @@ void ArchLinuxInstaller::afterInstall(const std::string& packageName)
 	{
 		if(efi)
 		{
-			std::string grubTarget = (utils::StringUtils::trim(utils::SystemUtils::ssystem("uname -m")) == "x86_64" ? "x86_64-efi" : "i386-efi");
+			std::string grubTarget = (boost::algorithm::trim_copy(utils::SystemUtils::ssystem("uname -m")) == "x86_64" ? "x86_64-efi" : "i386-efi");
 			utils::SystemUtils::csystem("grub-install --target=" + grubTarget + " --efi-directory=" + _devices.getEfiDirectory() + " --bootloader-id=grub --recheck");
 		}
 		else
@@ -286,7 +286,7 @@ bool ArchLinuxInstaller::installGrub() const
 
 bool ArchLinuxInstaller::createUsers() const
 {
-	return std::all_of(_users.begin(), _users.end(), [](const config::User& user)
+	return std::all_of(_users.begin(), _users.end(), [](const modules::users::User& user)
 	{
 		return user.create();
 	});

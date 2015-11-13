@@ -35,11 +35,13 @@ class PackageInstaller
 {
 private:
 	static const std::string DEFAULT_AUR_URL;
-	static const std::string DEFAULT_AUR_USER;
 
 	std::string aurUrl;
+
 	std::string aurUser;
 	bool aurUserCreated;
+
+	bool aurRequirementsInstalled;
 
 	std::vector<std::function<void(const std::string&)>> afterInstall;
 
@@ -68,7 +70,6 @@ public:
 	inline void setAurUrl(const std::string& aurUrl) { this->aurUrl = aurUrl; }
 
 	inline const std::string& getAurUser() const { return aurUser; }
-	inline void setAurUser(const std::string& aurUser) { this->aurUser = aurUser; }
 
 	inline void addAfterInstall(const std::function<void(const std::string&)>& func) { afterInstall.push_back(func); }
 
@@ -77,7 +78,7 @@ public:
 
 	std::vector<std::string> packagesToInstall(const std::string& packageName) const;
 
-	bool installAurRequirements() const;
+	bool installAurRequirements();
 
 	bool installPackage(const std::string& packageName) const;
 	bool installPackages(const std::vector<std::string>& packageNames) const;

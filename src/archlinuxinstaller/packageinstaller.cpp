@@ -23,18 +23,28 @@
 
 #include <algorithm>
 #include <fstream>
+#include <random>
 #include <set>
 
-#include "archlinuxinstaller/utils/stringutils.hpp"
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
+
+#include <boost/format.hpp>
 
 namespace archlinuxinstaller {
 
 const std::string PackageInstaller::DEFAULT_AUR_URL = "https://aur.archlinux.org/cgit/aur.git/snapshot/%s.tar.gz";
-const std::string PackageInstaller::DEFAULT_AUR_USER = "aur-installer-14839482";
 
 PackageInstaller::PackageInstaller() :
-	aurUrl(DEFAULT_AUR_URL), aurUser(DEFAULT_AUR_USER), aurUserCreated(false)
+	aurUrl(DEFAULT_AUR_URL), aurUserCreated(false), aurRequirementsInstalled(false)
 {
+	static std::random_device rd;
+	std::mt19937 rng(rd());
+	std::uniform_int_distribution<int> uni(1000, 1000000);
+
+	aurUser = "aur-installer-" + std::to_string(uni(rng));
 }
 
 std::vector<std::string> PackageInstaller::packagesToInstall(const std::string& packageName) const
@@ -43,7 +53,10 @@ std::vector<std::string> PackageInstaller::packagesToInstall(const std::string& 
 	if(isGroup(packageName)) command = "pacman -Sg base | sed -r 's/^[^ ]+ ([^ ]+)$/\\1/g' | xargs -I {} pactree -su {} | sort | uniq | xargs pacman -T";
 	else command = "pactree -su " + packageName + " | xargs pacman -T";
 
-	return utils::StringUtils::split(utils::SystemUtils::ssystem(command), '\n');
+	std::vector<std::string> packages;
+	std::string packagesString = utils::SystemUtils::ssystem(command);
+
+	return boost::algorithm::split(packages, packagesString, boost::is_any_of("\n"));
 }
 
 void PackageInstaller::runAfterInstall(const std::string& packageName) const
@@ -51,9 +64,15 @@ void PackageInstaller::runAfterInstall(const std::string& packageName) const
 	for(const auto& func : afterInstall) func(packageName);
 }
 
-bool PackageInstaller::installAurRequirements() const
+bool PackageInstaller::installAurRequirements()
 {
-	return installPackage("base-devel");
+	if(!aurRequirementsInstalled)
+	{
+		if(installPackage("base-devel")) aurRequirementsInstalled = true;
+		else return false;
+	}
+
+	return true;
 }
 
 bool PackageInstaller::installPackage(const std::string& packageName) const
@@ -63,7 +82,7 @@ bool PackageInstaller::installPackage(const std::string& packageName) const
 
 bool PackageInstaller::installPackage(const std::string& packageName, bool asDeps) const
 {
-	if(utils::StringUtils::trim(packageName).empty()) return false;
+	if(boost::algorithm::trim_copy(packageName).empty()) return false;
 
 	std::vector<std::string> toInstall = packagesToInstall(packageName);
 
@@ -91,8 +110,7 @@ bool PackageInstaller::installPackages(const std::vector<std::string>& packageNa
 	}
 
 	std::string asDepsParam = (asDeps ? "--asdeps " : "");
-	bool status = utils::SystemUtils::system("pacman -S --noconfirm --needed " + asDepsParam +
-				  utils::StringUtils::join(packageNames.begin(), packageNames.end(), ' '));
+	bool status = utils::SystemUtils::system("pacman -S --noconfirm --needed " + asDepsParam + boost::algorithm::join(packageNames, " "));
 
 	if(status) runAfterInstall(toInstall.begin(), toInstall.end());
 
@@ -123,10 +141,10 @@ bool PackageInstaller::removeAurUser()
 
 bool PackageInstaller::downloadAurPackage(const std::string& packageName) const
 {
-	if(utils::StringUtils::trim(packageName).empty()) return false;
+	if(boost::algorithm::trim_copy(packageName).empty()) return false;
 
 	std::string downloadCommand = "cd;";
-	downloadCommand += "wget " + utils::StringUtils::sprintf(aurUrl, packageName.c_str()) + ';';
+	downloadCommand += "wget " + boost::str(boost::format(aurUrl) % packageName) + ';';
 	downloadCommand += "tar -xf " + packageName + ".tar.gz";
 
 	return utils::SystemUtils::system("su " + aurUser + " -c \"" + downloadCommand + '"');
@@ -139,8 +157,8 @@ std::string PackageInstaller::getAurDepends(const std::string& pkgbuildPath) con
 	std::string line, depends;
 	while(std::getline(pkgbuild, line))
 	{
-		if(utils::StringUtils::startsWith(line, "depends=(") ||
-		   utils::StringUtils::startsWith(line, "makedepends=("))
+		if(boost::algorithm::starts_with(line, "depends=(") ||
+		   boost::algorithm::starts_with(line, "makedepends=("))
 		{
 			std::size_t startPos = line.find('(');
 			std::size_t endPos = line.rfind(')');
@@ -148,18 +166,21 @@ std::string PackageInstaller::getAurDepends(const std::string& pkgbuildPath) con
 			if(startPos != std::string::npos && endPos != std::string::npos)
 			{
 				startPos++;
-				depends += utils::StringUtils::trim(line.substr(startPos, endPos - startPos));
+				depends += boost::algorithm::trim_copy(line.substr(startPos, endPos - startPos));
 				depends += ' ';
 			}
 		}
 	}
 
-	return utils::StringUtils::trim(depends);
+	return boost::algorithm::trim_copy(depends);
 }
 
 void PackageInstaller::getMissingDepends(const std::string& pkgbuildPath, std::vector<std::string>& depends, std::vector<std::string>& aurDepends) const
 {
-	std::vector<std::string> missingDepends = utils::StringUtils::split(utils::SystemUtils::ssystem("pacman -T " + getAurDepends(pkgbuildPath)), '\n');
+	std::vector<std::string> missingDepends;
+	std::string packagesString = utils::SystemUtils::ssystem("pacman -T " + getAurDepends(pkgbuildPath));
+	boost::algorithm::split(missingDepends, packagesString, boost::is_any_of("\n"));
+
 	for(const std::string& pkg : missingDepends)
 	{
 		std::string pkgName = pkg.substr(0, pkg.find_first_of("><="));
@@ -181,8 +202,10 @@ bool PackageInstaller::installAurPackage(const std::string& packageName)
 
 bool PackageInstaller::installAurPackage(const std::string& packageName, bool asDeps)
 {
-	if(utils::StringUtils::trim(packageName).empty()) return false;
+	if(boost::algorithm::trim_copy(packageName).empty()) return false;
 	bool deleteAurUser = createAurUser();
+
+	installAurRequirements();
 
 	std::string packagePath = "/home/" + aurUser + '/' + packageName;
 

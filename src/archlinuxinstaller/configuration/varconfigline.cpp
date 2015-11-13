@@ -21,7 +21,7 @@
 
 #include "archlinuxinstaller/configuration/varconfigline.hpp"
 
-#include "archlinuxinstaller/utils/stringutils.hpp"
+#include <boost/algorithm/string/trim.hpp>
 
 namespace archlinuxinstaller {
 namespace configuration {
@@ -44,11 +44,11 @@ void VarConfigLine::parseLine(const std::string& line)
 	if(hashPos != std::string::npos) varLine = line.substr(0, hashPos);
 	else varLine = line;
 
-	varLine = utils::StringUtils::trim(varLine);
+	boost::algorithm::trim(varLine);
 	std::size_t startValPos = varLine.find("=\"") + 2;
 	// string::size_type endValPos = varLine.find("\"", startValPos) - 1;
 
-	name = utils::StringUtils::trim(varLine.substr(0, startValPos - 2));
+	name = boost::algorithm::trim_copy(varLine.substr(0, startValPos - 2));
 	value = varLine.substr(startValPos, varLine.length() - startValPos - 1);
 }
 

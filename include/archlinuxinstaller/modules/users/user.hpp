@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_CONFIG_USER_HPP
-#define ARCHLINUXINSTALLER_CONFIG_USER_HPP
+#ifndef ARCHLINUXINSTALLER_MODULES_USERS_USER_HPP
+#define ARCHLINUXINSTALLER_MODULES_USERS_USER_HPP
 
 #include <string>
 #include <experimental/optional>
@@ -29,7 +29,8 @@
 #include <yaml-cpp/yaml.h>
 
 namespace archlinuxinstaller {
-namespace config {
+namespace modules {
+namespace users {
 
 class User
 {
@@ -38,21 +39,21 @@ public:
 	std::experimental::optional<std::string> comment;
 	bool createHome;
 	std::vector<std::string> groups;
-	std::vector<std::string> sshKeys;
+	std::vector<std::string> authorizedKeys;
 
 	bool create() const;
 };
 
-}}
+}}}
 
 namespace YAML {
 
 template<>
-struct convert<archlinuxinstaller::config::User>
+struct convert<archlinuxinstaller::modules::users::User>
 {
-	static bool decode(Node node, archlinuxinstaller::config::User& user);
+	static bool decode(Node node, archlinuxinstaller::modules::users::User& user);
 };
 
 }
 
-#endif // ARCHLINUXINSTALLER_CONFIG_USER_HPP
+#endif // ARCHLINUXINSTALLER_MODULES_USERS_USERS_HPP

@@ -28,7 +28,7 @@ void printHelp(const std::string& programName, const std::string& programVersion
 int main(int argc, char **argv)
 {
 	std::string programName = "archlinux-installer";
-	std::string programVersion = "1.0";
+	std::string programVersion = "1.1";
 
 	if(argc < 2)
 	{

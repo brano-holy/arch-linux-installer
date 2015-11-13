@@ -23,11 +23,12 @@
 
 #include <fstream>
 
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
+
 #include "archlinuxinstaller/configuration/textconfigline.hpp"
 #include "archlinuxinstaller/configuration/varconfigline.hpp"
-
-#include "archlinuxinstaller/utils/stringutils.hpp"
-#include "archlinuxinstaller/utils/memutils.hpp"
 
 namespace archlinuxinstaller {
 namespace configuration {
@@ -51,7 +52,7 @@ bool Config::load(const std::string& configPath)
 	std::string line;
 	while(std::getline(file, line))
 	{
-		std::string trimLine = utils::StringUtils::trim(line);
+		std::string trimLine = boost::algorithm::trim_copy(line);
 		std::size_t hashPos = trimLine.find('#');
 
 		std::size_t signPos;
@@ -145,17 +146,20 @@ void Config::setValue(const std::string& name, const std::string& value, const s
 
 std::vector<std::string> Config::getValues(const std::string& name)
 {
-	return utils::StringUtils::split(getValue(name), ' ');
+	std::vector<std::string> values;
+	std::string nameValue = getValue(name);
+
+	return boost::algorithm::split(values, nameValue, boost::is_space());
 }
 
 void Config::setValues(const std::string& name, const std::vector<std::string>& values)
 {
-	setValue(name, utils::StringUtils::join(values.begin(), values.end(), ' '));
+	setValue(name, boost::algorithm::join(values, " "));
 }
 
 void Config::setValues(const std::string& name, const std::vector<std::string>& values, const std::string& comment)
 {
-	setValue(name, utils::StringUtils::join(values.begin(), values.end(), ' '), comment);
+	setValue(name, boost::algorithm::join(values, " "), comment);
 }
 
 }}

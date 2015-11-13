@@ -19,24 +19,43 @@
  *
  */
 
-#include "archlinuxinstaller/modules/userinput.hpp"
+#ifndef ARCHLINUXINSTALLER_MODULES_USERS_USERS_HPP
+#define ARCHLINUXINSTALLER_MODULES_USERS_USERS_HPP
+
+#include "archlinuxinstaller/modules/module.hpp"
+
+#include "user.hpp"
 
 namespace archlinuxinstaller {
 namespace modules {
+namespace users {
 
-UserInputBase::UserInputBase(const std::string& key, const std::string& name, UserInputType type) :
-	key(key), name(name), type(type)
+class Users : public Module, public std::vector<User>
 {
+protected:
+	virtual void addUserInputs(std::vector<UserInputBase*>& userInputs) const;
+
+public:
+	static const double ORDER;
+
+	virtual inline double getOrder() const { return ORDER; }
+
+	virtual bool runInside(const std::function<UIT>& ui);
+	virtual bool runOutsideAfter(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui);
+
+	bool createUsers() const;
+};
+
+}}}
+
+namespace YAML {
+
+template<>
+struct convert<archlinuxinstaller::modules::users::Users>
+{
+	static bool decode(Node node, archlinuxinstaller::modules::users::Users& users);
+};
+
 }
 
-std::istream& operator>>(std::istream& in, UserInputBase& userInput)
-{
-	return userInput.read(in);
-}
-
-std::ostream& operator<<(std::ostream& out, const UserInputBase& userInput)
-{
-	return userInput.write(out);
-}
-
-}}
+#endif // ARCHLINUXINSTALLER_MODULES_USERS_USERS_HPP

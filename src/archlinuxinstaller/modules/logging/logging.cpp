@@ -23,7 +23,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include "archlinuxinstaller/utils/stringutils.hpp"
+#include "archlinuxinstaller/utils/formatutils.hpp"
 
 namespace archlinuxinstaller {
 namespace modules {
@@ -46,7 +46,7 @@ Logging::~Logging()
 
 bool Logging::runOutsideBefore(const std::function<UIT>&)
 {
-	tempPath = "log-" + utils::StringUtils::formatNow("%Y%m%d-%H%M%S") + ".txt";
+	tempPath = "log-" + utils::FormatUtils::formatNow("%Y%m%d-%H%M%S") + ".txt";
 
 	delete logStream;
 	delete logDevice;

@@ -19,40 +19,38 @@
  *
  */
 
-#ifndef ARCHLINUXINSTALLER_MODULES_DEVICES_SSHDECRYPT_HPP
-#define ARCHLINUXINSTALLER_MODULES_DEVICES_SSHDECRYPT_HPP
-
-#include <string>
-
-#include <yaml-cpp/yaml.h>
+#include "archlinuxinstaller/modules/pacman/pacman.hpp"
 
 #include "archlinuxinstaller/packageinstaller.hpp"
+#include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
 namespace modules {
-namespace devices {
+namespace pacman {
 
-class SshDecrypt
+const double Pacman::ORDER = 0.22;
+
+bool Pacman::runInside(const std::function<UIT>& ui)
 {
-public:
-	std::string ip;
-	std::string network;
-	std::string sshServer;
-	std::vector<std::string> authorizedKeys;
+	bool status = true;
 
-	bool install(PackageInstaller& packageInstaller, const std::string& grubDevice = "", const std::string& grubDmname = "") const;
-};
+	PackageInstaller installer;
+	if(!packages.empty()) status &= ui("Installing packages", installer.installPackages(packages));
+	if(!aurPackages.empty()) status &= ui("Installing AUR packages", installer.installAurPackages(aurPackages));
+
+	return status;
+}
 
 }}}
 
 namespace YAML {
 
-template<>
-struct convert<archlinuxinstaller::modules::devices::SshDecrypt>
+bool convert<archlinuxinstaller::modules::pacman::Pacman>::decode(Node node, archlinuxinstaller::modules::pacman::Pacman& pacman)
 {
-	static bool decode(const Node& node, archlinuxinstaller::modules::devices::SshDecrypt& sshDecrypt);
-};
+	if(node["packages"]) pacman.packages = node["packages"].as<std::vector<std::string>>();
+	if(node["aurPackages"]) pacman.aurPackages = node["aurPackages"].as<std::vector<std::string>>();
 
+	return true;
 }
 
-#endif // ARCHLINUXINSTALLER_MODULES_DEVICES_SSHDECRYPT_HPP
+}

@@ -39,7 +39,7 @@ protected:
 
 public:
 	UserInputBase(const std::string& key, const std::string& name, UserInputType type);
-	virtual ~UserInputBase();
+	virtual ~UserInputBase() = default;
 
 	inline const std::string& getKey() const { return key; }
 	inline const std::string& getName() const { return name; }
@@ -61,6 +61,7 @@ protected:
 public:
 	UserInput(const std::string& name, UserInputType type);
 	UserInput(const std::string& key, const std::string& name, UserInputType type);
+	virtual ~UserInput() = default;
 
 	inline const T& getValue() const { return value; }
 

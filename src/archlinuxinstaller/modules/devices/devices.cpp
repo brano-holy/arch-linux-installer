@@ -39,8 +39,6 @@ void Devices::addUserInputs(std::vector<UserInputBase*>& userInputs)
 	{
 		userInputs.push_back(new UserInput<std::string>("lvm-passphrase", "LVM Passphrase", UserInputType::Password));
 	}
-
-	//userInputs.push_back(new UserInput<std::string>("root-password", "UNIX password for user 'root'", UserInputType::Password));
 }
 
 bool Devices::runOutsideBefore(const std::function<UIT>& ui)
@@ -62,17 +60,6 @@ bool Devices::runOutside(const std::map<std::string, UserInputBase*>& userInputs
 	status &= ui("Mounting partitions", mountPartitions());
 
 	return status;
-}
-
-bool Devices::runOutsideAfter(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui)
-{
-	/*
-	std::string usersPasswordsPath = "devices-root-password-" + Module::PROGRAM_NAME + ".txt";
-	std::ofstream usersPasswordsFile(usersPasswordsPath);
-	usersPasswordsFile << "root:" << *userInputs.at("root-password") << std::endl;
-	*/
-
-	return ui("Setting root password", false);
 }
 
 bool Devices::hasEncryption() const

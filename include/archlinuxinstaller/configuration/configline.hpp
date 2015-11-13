@@ -30,6 +30,8 @@ namespace configuration {
 	class ConfigLine
 	{
 	public:
+		virtual ~ConfigLine() = default;
+
 		virtual void parseLine(const std::string& line) = 0;
 		virtual void writeLine(std::ostream& out) const = 0;
 
