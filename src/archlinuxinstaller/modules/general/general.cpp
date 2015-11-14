@@ -21,13 +21,22 @@
 
 #include "archlinuxinstaller/modules/general/general.hpp"
 
+#include <boost/filesystem.hpp>
+
 #include "archlinuxinstaller/utils/systemutils.hpp"
 
 namespace archlinuxinstaller {
 namespace modules {
 namespace general {
 
-const double General::ORDER = 0;
+General::General() : Module("general", 0)
+{
+}
+
+bool General::decode(const YAML::Node& node)
+{
+	return YAML::convert<General>::decode(node, *this);
+}
 
 bool General::runOutsideBefore(const std::function<UIT>&)
 {
@@ -35,11 +44,23 @@ bool General::runOutsideBefore(const std::function<UIT>&)
 	return true;
 }
 
+bool General::runOutsideAfter(const std::map<std::string, UserInputBase*>&, const std::function<UIT>&)
+{
+	bool status = true;
+	std::string dir = "/mnt/root/" + Module::PROGRAM_NAME;
+
+	if(!keepConfig) status &= boost::filesystem::remove(dir + '/' + programFilename);
+	if(!keepProgram) status &= boost::filesystem::remove(dir + '/' + configFilename);
+	if(boost::filesystem::is_empty(dir)) status &= boost::filesystem::remove(dir);
+
+	return status;
+}
+
 }}}
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::modules::general::General>::decode(Node node, archlinuxinstaller::modules::general::General& general)
+bool convert<archlinuxinstaller::modules::general::General>::decode(const Node& node, archlinuxinstaller::modules::general::General& general)
 {
 	general.debug = node["debug"].as<bool>(false);
 	general.keepConfig = node["keepConfig"].as<bool>(false);

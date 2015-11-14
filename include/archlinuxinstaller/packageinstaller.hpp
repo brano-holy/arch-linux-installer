@@ -35,6 +35,7 @@ class PackageInstaller
 {
 private:
 	static const std::string DEFAULT_AUR_URL;
+	static std::vector<std::function<void(const std::string&)>> globalAfterInstall;
 
 	std::string aurUrl;
 
@@ -64,6 +65,8 @@ private:
 	bool installAurPackages(const std::vector<std::string>& packageNames, bool asDeps);
 
 public:
+	static inline void addGlobalAfterInstall(const std::function<void(const std::string&)>& func) { globalAfterInstall.push_back(func); }
+
 	PackageInstaller();
 
 	inline const std::string& getAurUrl() const { return aurUrl; }

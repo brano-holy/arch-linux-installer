@@ -21,6 +21,8 @@
 
 #include "archlinuxinstaller/modules/devices/encryption.hpp"
 
+#include "archlinuxinstaller/packageinstaller.hpp"
+
 #include "archlinuxinstaller/modules/devices/partition.hpp"
 #include "archlinuxinstaller/configuration/config.hpp"
 #include "archlinuxinstaller/utils/systemutils.hpp"
@@ -52,8 +54,10 @@ void Encryption::fillMountables(std::vector<std::reference_wrapper<const Volume>
 	for(const VolumeGroup& vg : volumeGroups) vg.fillMountables(mountables);
 }
 
-bool Encryption::install(PackageInstaller& packageInstaller, const std::string& grubDevice, const std::string& grubDmname) const
+bool Encryption::install(const std::string& grubDevice, const std::string& grubDmname) const
 {
+	PackageInstaller packageInstaller;
+
 	bool statusMkinitcpio = true;
 	if(!sshDecrypt && packageInstaller.isInstalled("mkinitcpio"))
 	{
@@ -75,7 +79,7 @@ bool Encryption::install(PackageInstaller& packageInstaller, const std::string& 
 	}
 
 	bool statusSshDecrypt = true;
-	if(sshDecrypt) statusSshDecrypt = sshDecrypt->install(packageInstaller, grubDevice, grubDmname);
+	if(sshDecrypt) statusSshDecrypt = sshDecrypt->install(grubDevice, grubDmname);
 
 	return (statusMkinitcpio && statusGrub && statusSshDecrypt);
 }

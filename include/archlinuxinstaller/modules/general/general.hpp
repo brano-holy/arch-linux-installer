@@ -31,14 +31,19 @@ namespace general {
 class General : public Module
 {
 public:
-	static const double ORDER;
-
 	bool debug;
 	bool keepConfig;
 	bool keepProgram;
 
-	virtual inline double getOrder() const { return ORDER; }
+	std::string programFilename;
+	std::string configFilename;
+
+	General();
+
+	virtual bool decode(const YAML::Node& node);
+
 	virtual bool runOutsideBefore(const std::function<UIT>& ui);
+	virtual bool runOutsideAfter(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui);
 };
 
 }}}
@@ -48,7 +53,7 @@ namespace YAML {
 template<>
 struct convert<archlinuxinstaller::modules::general::General>
 {
-	static bool decode(Node node, archlinuxinstaller::modules::general::General& general);
+	static bool decode(const Node& node, archlinuxinstaller::modules::general::General& general);
 };
 
 }

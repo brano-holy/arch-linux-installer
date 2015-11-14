@@ -30,31 +30,39 @@ namespace archlinuxinstaller {
 namespace modules {
 namespace users {
 
-const double Users::ORDER = 0.23;
+Users::Users() : Module("users", 0.23), std::vector<User>()
+{
+}
+
+bool Users::decode(const YAML::Node& node)
+{
+	return YAML::convert<Users>::decode(node, *this);
+}
 
 void Users::addUserInputs(std::vector<UserInputBase*>& userInputs) const
 {
-	userInputs.push_back(new UserInput<std::string>("users-root-password", "UNIX password for user 'root'", UserInputType::Password));
+	userInputs.push_back(new UserInput<std::string>("root", "UNIX password for user 'root'", UserInputType::Password));
 	for(const User& user : *this)
 	{
-		userInputs.push_back(new UserInput<std::string>("users-" + user.name + "-password", "UNIX password for user '" + user.name + "'", UserInputType::Password));
+		userInputs.push_back(new UserInput<std::string>(user.name, "UNIX password for user '" + user.name + "'", UserInputType::Password));
 	}
 }
 
 bool Users::runInside(const std::function<UIT>& ui)
 {
-	return ui("Creating users", createUsers());
+	if(!empty()) return ui("Creating users", createUsers());
+	return true;
 }
 
 bool Users::runOutsideAfter(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui)
 {
-	std::string usersPasswordsPath = "devices-root-password-" + Module::PROGRAM_NAME + ".txt";
+	std::string usersPasswordsPath = "users-passwords-" + Module::PROGRAM_NAME + ".txt";
 	std::ofstream usersPasswordsFile(usersPasswordsPath);
 
-	usersPasswordsFile << "root:" << *userInputs.at("users-root-password") << std::endl;
+	usersPasswordsFile << "root:" << *userInputs.at("root") << std::endl;
 	for(const User& user : *this)
 	{
-		usersPasswordsFile << user.name << ':' << *userInputs.at("users-" + user.name + "-password") << std::endl;
+		usersPasswordsFile << user.name << ':' << *userInputs.at(user.name) << std::endl;
 	}
 
 	return ui("Setting users' passwords",
@@ -74,7 +82,7 @@ bool Users::createUsers() const
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::modules::users::Users>::decode(Node node, archlinuxinstaller::modules::users::Users& users)
+bool convert<archlinuxinstaller::modules::users::Users>::decode(const Node& node, archlinuxinstaller::modules::users::Users& users)
 {
 	if(node.IsSequence())
 	{

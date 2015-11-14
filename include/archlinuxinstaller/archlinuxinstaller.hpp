@@ -22,11 +22,7 @@
 #ifndef ARCHLINUXINSTALLER_ARCHLINUXINSTALLER_HPP
 #define ARCHLINUXINSTALLER_ARCHLINUXINSTALLER_HPP
 
-#include <yaml-cpp/yaml.h>
-
-#include "archlinuxinstaller/modules/devices/devices.hpp"
-#include "archlinuxinstaller/modules/settings/settings.hpp"
-#include "archlinuxinstaller/modules/users/user.hpp"
+#include "archlinuxinstaller/modules/module.hpp"
 
 #include "packageinstaller.hpp"
 
@@ -35,55 +31,37 @@ namespace archlinuxinstaller {
 class ArchLinuxInstaller
 {
 private:
-	static const std::string AUR_URL;
 	static const std::string BASE_PACKAGES;
 
 	std::string configPath;
 	std::string programName;
 
-	PackageInstaller packageInstaller;
-
 	std::string argProgramPath;
 	bool argChroot;
-	bool argLog;
 
+	std::ostream ui;
+	std::function<modules::Module::UIT> uif;
+
+	std::vector<modules::Module*> modules;
 	bool efi;
-
-	bool debug;
-	bool log;
-	bool keepProgram;
-	bool keepConfig;
-
-	modules::devices::Devices _devices;
-	modules::settings::Settings _settings;
-	std::vector<modules::users::User> _users;
-
-	std::vector<std::string> packages;
-	std::vector<std::string> aurPackages;
-
-	std::string lvmPassphrasePath;
-	std::string usersPasswordsPath;
 
 	void loadArgs(int argc, char **argv);
 	void loadEfi();
 	void loadConfig(const std::string& configPath);
 
-	int installWithLog(int argc, char **argv);
 	int installChroot();
 
 	bool setClock() const;
 	bool setNetwork() const;
-	bool readPasswords();
+	std::map<std::string, std::map<std::string, modules::UserInputBase*>> readUserInputs();
 
 	bool installBase() const;
 	void runChroot() const;
-	bool setUsersPasswords() const;
 	bool cleanUp() const;
 
 	void afterInstall(const std::string& packageName);
 
 	bool installGrub() const;
-	bool createUsers() const;
 
 	static void printTitle(const std::string& title);
 	static bool printStatus(bool status);

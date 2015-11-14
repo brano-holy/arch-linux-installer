@@ -29,9 +29,7 @@ namespace archlinuxinstaller {
 namespace modules {
 namespace logging {
 
-const double Logging::ORDER = 0.01;
-
-Logging::Logging() :
+Logging::Logging() : Module("logging", 0.01),
 	tempCout(nullptr), logFile(nullptr), logDevice(nullptr), logStream(nullptr)
 {
 }
@@ -42,6 +40,11 @@ Logging::~Logging()
 	delete logDevice;
 	delete logFile;
 	delete tempCout;
+}
+
+bool Logging::decode(const YAML::Node& node)
+{
+	return YAML::convert<Logging>::decode(node, *this);
 }
 
 bool Logging::runOutsideBefore(const std::function<UIT>&)
@@ -95,7 +98,7 @@ bool Logging::runOutsideAfter(const std::map<std::string, UserInputBase*>&, cons
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::modules::logging::Logging>::decode(Node node, archlinuxinstaller::modules::logging::Logging& logging)
+bool convert<archlinuxinstaller::modules::logging::Logging>::decode(const Node& node, archlinuxinstaller::modules::logging::Logging& logging)
 {
 	using archlinuxinstaller::modules::Module;
 

@@ -31,13 +31,16 @@ namespace pacman {
 class Pacman : public Module
 {
 public:
-	static const double ORDER;
-
 	std::vector<std::string> packages;
 	std::vector<std::string> aurPackages;
 
-	virtual inline double getOrder() const { return ORDER; }
+	Pacman();
+
+	virtual bool decode(const YAML::Node& node);
+
 	virtual bool runInside(const std::function<UIT>& ui);
+
+	void afterInstall(const std::string& packageName);
 };
 
 }}}
@@ -47,7 +50,7 @@ namespace YAML {
 template<>
 struct convert<archlinuxinstaller::modules::pacman::Pacman>
 {
-	static bool decode(Node node, archlinuxinstaller::modules::pacman::Pacman& pacman);
+	static bool decode(const Node& node, archlinuxinstaller::modules::pacman::Pacman& pacman);
 };
 
 }

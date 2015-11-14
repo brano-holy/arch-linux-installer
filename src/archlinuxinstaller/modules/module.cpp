@@ -28,6 +28,11 @@ namespace modules {
 
 std::string Module::PROGRAM_NAME = "";
 
+Module::Module(const std::string& tagName, double order, bool required) :
+	tagName(tagName), order(order), required(required)
+{
+}
+
 Module::~Module()
 {
 	for(UserInputBase *userInput : userInputs) delete userInput;
@@ -36,6 +41,13 @@ Module::~Module()
 
 void Module::addUserInputs(std::vector<UserInputBase*>&) const
 {
+}
+
+bool Module::loadConfig(const YAML::Node& config)
+{
+	if(required || config[tagName]) return decode(config[tagName]);
+
+	return true;
 }
 
 std::vector<UserInputBase*> Module::getUserInputs()
@@ -72,11 +84,6 @@ bool Module::runInsideAfter(const std::function<UIT>&)
 bool Module::runOutsideAfter(const std::map<std::string, UserInputBase*>&, const std::function<UIT>&)
 {
 	return true;
-}
-
-bool Module::operator<(const Module& other) const
-{
-	return getOrder() < other.getOrder();
 }
 
 }}

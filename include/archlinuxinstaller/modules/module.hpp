@@ -39,16 +39,27 @@ private:
 	std::vector<UserInputBase*> userInputs;
 
 protected:
+	std::string tagName;
+	double order;
+	bool required;
+
 	virtual void addUserInputs(std::vector<UserInputBase*>& userInputs) const;
 
 public:
-	using UIT = bool(std::string, bool);
+	using UIT = bool(const std::string&, bool);
 
 	static std::string PROGRAM_NAME;
 
+	Module(const std::string& tagName, double order, bool required = false);
 	virtual ~Module();
 
-	virtual double getOrder() const = 0;
+	virtual inline std::string getTagName() const final { return tagName; }
+	virtual inline double getOrder() const final { return order; }
+	virtual inline bool isRequired() const final { return required; }
+
+	virtual bool decode(const YAML::Node& node) = 0;
+
+	virtual bool loadConfig(const YAML::Node& config);
 
 	virtual std::vector<UserInputBase*> getUserInputs() final;
 
@@ -58,8 +69,6 @@ public:
 	virtual bool runInside(const std::function<UIT>& ui);
 	virtual bool runInsideAfter(const std::function<UIT>& ui);
 	virtual bool runOutsideAfter(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui);
-
-	bool operator<(const Module& other) const;
 };
 
 }}

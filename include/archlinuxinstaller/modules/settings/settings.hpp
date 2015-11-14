@@ -33,8 +33,6 @@ namespace settings {
 class Settings : public Module
 {
 public:
-	static const double ORDER;
-
 	std::experimental::optional<std::string> keyboard;
 	std::experimental::optional<std::string> font;
 	std::vector<std::string> locales;
@@ -42,7 +40,10 @@ public:
 	std::experimental::optional<std::string> timezone;
 	std::experimental::optional<std::string> hostname;
 
-	virtual inline double getOrder() const { return ORDER; }
+	Settings();
+
+	virtual bool decode(const YAML::Node& node);
+
 	virtual bool runOutsideBefore(const std::function<UIT>& ui);
 	virtual bool runInside(const std::function<UIT>& ui);
 
@@ -61,7 +62,7 @@ namespace YAML {
 template<>
 struct convert<archlinuxinstaller::modules::settings::Settings>
 {
-	static bool decode(Node node, archlinuxinstaller::modules::settings::Settings& settings);
+	static bool decode(const Node& node, archlinuxinstaller::modules::settings::Settings& settings);
 };
 
 }

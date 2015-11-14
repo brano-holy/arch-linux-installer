@@ -21,6 +21,7 @@
 
 #include "archlinuxinstaller/archlinuxinstaller.hpp"
 
+/*
 #include <algorithm>
 #include <cstring>
 #include <fstream>
@@ -30,19 +31,29 @@
 
 #include "archlinuxinstaller/configuration/config.hpp"
 #include "archlinuxinstaller/utils/systemutils.hpp"
+*/
+
+#include "archlinuxinstaller/modules/userinput.hpp" // TODO: needed?
+
+#include "archlinuxinstaller/modules/general/general.hpp"
+#include "archlinuxinstaller/modules/logging/logging.hpp"
+#include "archlinuxinstaller/modules/devices/devices.hpp"
+#include "archlinuxinstaller/modules/settings/settings.hpp"
+#include "archlinuxinstaller/modules/pacman/pacman.hpp"
+#include "archlinuxinstaller/modules/users/users.hpp"
 
 namespace archlinuxinstaller {
 
-const std::string ArchLinuxInstaller::AUR_URL = "https://aur.archlinux.org/cgit/aur.git/snapshot/%s.tar.gz";
 const std::string ArchLinuxInstaller::BASE_PACKAGES = "wget";
 
 ArchLinuxInstaller::ArchLinuxInstaller(const std::string& configPath, const std::string& programName) :
-	configPath(configPath), programName(programName), argChroot(false), argLog(false)
+	configPath(configPath), programName(programName), argChroot(false), ui(std::cout.rdbuf()),
+	uif(std::bind(&ArchLinuxInstaller::printInfo, std::placeholders::_1, std::placeholders::_2))
 {
 	loadConfig(configPath);
 	loadEfi();
 
-	packageInstaller.addAfterInstall(std::bind(&ArchLinuxInstaller::afterInstall, this, std::placeholders::_1));
+	PackageInstaller::addGlobalAfterInstall(std::bind(&ArchLinuxInstaller::afterInstall, this, std::placeholders::_1));
 }
 
 void ArchLinuxInstaller::loadArgs(int argc, char **argv)
@@ -51,7 +62,6 @@ void ArchLinuxInstaller::loadArgs(int argc, char **argv)
 	for(int i = 1; i < argc; i++)
 	{
 		if(strcmp(argv[i], "--chroot") == 0) argChroot = true;
-		else if(strcmp(argv[i], "--log") == 0) argLog = true;
 	}
 }
 
@@ -62,57 +72,58 @@ void ArchLinuxInstaller::loadEfi()
 
 void ArchLinuxInstaller::loadConfig(const std::string& configPath)
 {
+	namespace m = archlinuxinstaller::modules;
+
 	YAML::Node config = YAML::LoadFile(configPath);
 
-	debug = config["debug"].as<bool>(false);
-	log = config["log"].as<bool>(false);
-	keepProgram = config["keepProgram"].as<bool>(false);
-	keepConfig = config["keepConfig"].as<bool>(false);
+	modules.push_back(new m::general::General());
+	modules.push_back(new m::devices::Devices());
+	modules.push_back(new m::users::Users());
 
-	_devices = config["devices"].as<archlinuxinstaller::modules::devices::Devices>();
-	_settings = config["settings"].as<archlinuxinstaller::modules::settings::Settings>();
-	_users = config["users"].as<std::vector<archlinuxinstaller::modules::users::User>>();
+	if(config["logging"]) modules.push_back(new m::logging::Logging());
+	if(config["settings"]) modules.push_back(new m::settings::Settings());
+	if(config["pacman"]) modules.push_back(new m::pacman::Pacman());
 
-	if(config["packages"]) packages = config["packages"].as<std::vector<std::string>>();
-	if(config["aurPackages"]) aurPackages = config["aurPackages"].as<std::vector<std::string>>();
-
-	utils::SystemUtils::DEBUG = debug;
-}
-
-int ArchLinuxInstaller::installWithLog(int, char **)
-{
-	std::string cmd = ""; // utils::StringUtils::join(argv, argv + argc, ' ');
-	return utils::SystemUtils::csystem(cmd + " --log 2>&1 | tee log-" + programName + ".txt");
+	for(m::Module *module : modules)
+	{
+		module->loadConfig(config); // TODO: rethrow error, cannot parse required module
+	}
 }
 
 int ArchLinuxInstaller::install(int argc, char **argv)
 {
+	namespace m = archlinuxinstaller::modules;
+
 	loadArgs(argc, argv);
 
-	if(!argLog && log) return installWithLog(argc, argv);
 	if(argChroot) return installChroot();
 
-	printTitle("Checking");
-	if(!printInfo("Looking for the root partition", _devices.hasRoot())) return 1;
+	std::sort(modules.begin(), modules.end(), [](m::Module *a, m::Module *b) { return a->getOrder() < b->getOrder(); });
+	for(m::Module *module : modules)
+	{
+		if(!module->runOutsideBefore(uif)) return 1;
+	}
 
-	printTitle("Basic settings");
-	printInfo("Setting keyboard", _settings.setKeyboard());
-	printInfo("Setting font", _settings.setFont());
+	std::map<std::string, std::map<std::string, m::UserInputBase*>> modulesUserInputs = readUserInputs();
 
-	printTitle("Entering passwords");
-	printInfo("Reading passwords", readPasswords());
+	for(m::Module *module : modules)
+	{
+		if(!module->runOutside(modulesUserInputs[module->getTagName()], uif)) return 1;
+	}
 
-	printTitle("Preparing drives");
-	printInfo("Creating partitions", _devices.createPartitions(lvmPassphrasePath));
-	printInfo("Mounting partitions", _devices.mountPartitions());
 
 	printTitle("Installation");
 	printInfo("Installing Arch Linux base", installBase());
 
 	runChroot();
 
+	std::sort(modules.begin(), modules.end(), [](m::Module *a, m::Module *b) { return a->getOrder() > b->getOrder(); });
+	for(m::Module *module : modules)
+	{
+		if(!module->runOutsideAfter(modulesUserInputs[module->getTagName()], uif)) return 1;
+	}
+
 	printTitle("Finishing");
-	printInfo("Setting users' passwords", setUsersPasswords());
 	printInfo("Final clean up", cleanUp());
 
 	std::cout << "> Installation has finished. Press [Enter] to reboot..." << std::endl;
@@ -126,41 +137,26 @@ int ArchLinuxInstaller::install(int argc, char **argv)
 
 int ArchLinuxInstaller::installChroot()
 {
-	printTitle("Basic settings");
-	printInfo("Setting keyboard", _settings.setKeyboard(true));
-	printInfo("Setting font", _settings.setFont(true));
-	printInfo("Setting locales", _settings.setLocales());
-	printInfo("Setting lang", _settings.setLang());
-	printInfo("Setting timezone", _settings.setTimezone());
-	printInfo("Setting hostname", _settings.setHostname());
+	namespace m = archlinuxinstaller::modules;
 
+	std::sort(modules.begin(), modules.end(), [](m::Module *a, m::Module *b) { return a->getOrder() < b->getOrder(); });
+	for(m::Module *module : modules)
+	{
+		if(!module->runInsideBefore(uif)) return 1;
+	}
+
+	for(m::Module *module : modules)
+	{
+		if(!module->runInside(uif)) return 1;
+	}
+
+	for(m::Module *module : modules)
+	{
+		if(!module->runInsideAfter(uif)) return 1;
+	}
 	printInfo("Setting clock", setClock());
 	printInfo("Configuring network", setNetwork());
-
-	printInfo("Creating users", createUsers());
 	printInfo("Installing GRUB", installGrub());
-
-	printTitle("Additional packages");
-	if(!packages.empty()) printInfo("Installing packages", packageInstaller.installPackages(packages));
-	if(!aurPackages.empty())
-	{
-		packageInstaller.installAurRequirements();
-		printInfo("Installing AUR packages", packageInstaller.installAurPackages(aurPackages));
-	}
-
-	printTitle("Additional features");
-	if(_devices.hasEncryption())
-	{
-		std::string grubDevice, grubDmname;
-		_devices.getGrubParams(grubDevice, grubDmname);
-
-		std::string message = "Installing encryption";
-		if(_devices.getEncryption()->sshDecrypt) message += " & SSH decrypt";
-
-		printInfo(message, _devices.getEncryption()->install(packageInstaller, grubDevice, grubDmname));
-	}
-
-	printInfo("Creating users", createUsers());
 
 	return 0;
 }
@@ -176,42 +172,38 @@ bool ArchLinuxInstaller::setNetwork() const
 	return utils::SystemUtils::system("systemctl enable dhcpcd.service");
 }
 
-bool ArchLinuxInstaller::readPasswords()
+std::map<std::string, std::map<std::string, modules::UserInputBase*>> ArchLinuxInstaller::readUserInputs()
 {
-	std::cout << "> Keyboard layout: " << _settings.keyboard.value_or("default (probably 'us')") << std::endl;
+	namespace m = archlinuxinstaller::modules;
 
-	try
+	std::map<std::string, std::map<std::string, m::UserInputBase*>> modulesUserInputs;
+	for(m::Module *module : modules)
 	{
-		if(_devices.hasEncryption())
-		{
-			std::string lvmPassphrase = utils::SystemUtils::readPassword("LVM passphrase");
-			std::cout << std::endl;
+		std::map<std::string, m::UserInputBase*> moduleUserInputs;
 
-			lvmPassphrasePath = "lvm-passphrase-" + programName + ".txt";
-			std::ofstream lvmPassphraseFile(lvmPassphrasePath);
-			lvmPassphraseFile << lvmPassphrase;
+		std::vector<m::UserInputBase*> userInputs = module->getUserInputs();
+		for(m::UserInputBase *userInput : userInputs)
+		{
+			moduleUserInputs[userInput->getKey()] = userInput;
+
+			if(userInput->getType() == m::UserInputType::Text)
+			{
+				ui << userInput->getName() << ": ";
+				std::cin >> *userInput;
+			}
+			else if(userInput->getType() == m::UserInputType::Password)
+			{
+				std::istringstream iss(utils::SystemUtils::readPassword(userInput->getName()));
+				iss >> *userInput;
+			}
+
+			ui << std::endl;
 		}
 
-		usersPasswordsPath = "users-passwords-" + programName + ".txt";
-		std::ofstream usersPasswordsFile(usersPasswordsPath);
-
-		usersPasswordsFile << "root:" << utils::SystemUtils::readPassword("UNIX password for user 'root'") << std::endl;
-		std::cout << std::endl;
-
-		for(const modules::users::User& user : _users)
-		{
-			std::string password = utils::SystemUtils::readPassword("UNIX password for user '" + user.name + '\'');
-
-			usersPasswordsFile << user.name << ':' << password << std::endl;
-			std::cout << std::endl;
-		}
-
-		return true;
+		modulesUserInputs[module->getTagName()] = moduleUserInputs;
 	}
-	catch(const std::exception&)
-	{
-		return false;
-	}
+
+	return modulesUserInputs;
 }
 
 bool ArchLinuxInstaller::installBase() const
@@ -232,38 +224,19 @@ void ArchLinuxInstaller::runChroot() const
 	utils::SystemUtils::csystem("cp " + configPath + " /mnt/root/" + programName + "/config.yaml");
 
 	std::string chrootParams = "--chroot";
-	if(log) chrootParams += " --log";
 	utils::SystemUtils::csystem("arch-chroot /mnt /root/" + programName + '/' + programName + " /root/" + programName + "/config.yaml " + chrootParams);
-}
-
-bool ArchLinuxInstaller::setUsersPasswords() const
-{
-	return (utils::SystemUtils::system("arch-chroot /mnt chpasswd < " + usersPasswordsPath) &&
-			utils::SystemUtils::system("rm " + usersPasswordsPath));
 }
 
 bool ArchLinuxInstaller::cleanUp() const
 {
-	bool status = true;
-
-	if(!keepProgram) status &= utils::SystemUtils::system("rm /mnt/root/" + programName + '/' + programName);
-	if(!keepConfig) status &= utils::SystemUtils::system("rm /mnt/root/" + programName + "/config.yaml");
-	if(log) status &= utils::SystemUtils::system("cp log-" + programName + ".txt /mnt/root/" + programName + "/log.txt");
-	status &= utils::SystemUtils::system("rmdir --ignore-fail-on-non-empty /mnt/root/" + programName);
-
-	status &= utils::SystemUtils::system("umount -R /mnt");
-
-	return status;
+	return utils::SystemUtils::system("umount -R /mnt");
 }
 
 void ArchLinuxInstaller::afterInstall(const std::string& packageName)
 {
-	if(packageName == "sudo")
+	if(packageName == "grub")
 	{
-		utils::SystemUtils::csystem("echo \"%wheel ALL=(ALL) ALL\" > /etc/sudoers.d/99-wheel");
-	}
-	else if(packageName == "grub")
-	{
+		/*
 		if(efi)
 		{
 			std::string grubTarget = (boost::algorithm::trim_copy(utils::SystemUtils::ssystem("uname -m")) == "x86_64" ? "x86_64-efi" : "i386-efi");
@@ -273,6 +246,7 @@ void ArchLinuxInstaller::afterInstall(const std::string& packageName)
 		{
 			utils::SystemUtils::csystem("grub-install --recheck " + _devices.front().path);
 		}
+		*/
 
 		utils::SystemUtils::csystem("grub-mkconfig -o /boot/grub/grub.cfg");
 	}
@@ -280,16 +254,9 @@ void ArchLinuxInstaller::afterInstall(const std::string& packageName)
 
 bool ArchLinuxInstaller::installGrub() const
 {
+	PackageInstaller packageInstaller;
 	if(efi) return packageInstaller.installPackages({"grub", "dosfstools", "efibootmgr"});
 	else return packageInstaller.installPackage("grub");
-}
-
-bool ArchLinuxInstaller::createUsers() const
-{
-	return std::all_of(_users.begin(), _users.end(), [](const modules::users::User& user)
-	{
-		return user.create();
-	});
 }
 
 void ArchLinuxInstaller::printTitle(const std::string& title)

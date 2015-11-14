@@ -34,12 +34,12 @@ namespace archlinuxinstaller {
 namespace modules {
 namespace logging {
 
-typedef boost::iostreams::tee_device<std::ostream, std::ostream> TeeDevice;
-typedef boost::iostreams::stream<TeeDevice> TeeStream;
-
 class Logging : public Module
 {
 private:
+	typedef boost::iostreams::tee_device<std::ostream, std::ostream> TeeDevice;
+	typedef boost::iostreams::stream<TeeDevice> TeeStream;
+
 	std::string tempPath;
 	std::ostream *tempCout;
 	std::fstream *logFile;
@@ -51,15 +51,14 @@ private:
 	std::streambuf *clogBuf;
 
 public:
-	static const double ORDER;
-
 	bool log;
 	std::string path;
 
 	Logging();
 	virtual ~Logging();
 
-	virtual inline double getOrder() const { return ORDER; }
+	virtual bool decode(const YAML::Node& node);
+
 	virtual bool runOutsideBefore(const std::function<UIT>& ui);
 	virtual bool runOutsideAfter(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui);
 };
@@ -71,7 +70,7 @@ namespace YAML {
 template<>
 struct convert<archlinuxinstaller::modules::logging::Logging>
 {
-	static bool decode(Node node, archlinuxinstaller::modules::logging::Logging& logging);
+	static bool decode(const Node& node, archlinuxinstaller::modules::logging::Logging& logging);
 };
 
 }

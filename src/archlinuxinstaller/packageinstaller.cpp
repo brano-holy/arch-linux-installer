@@ -36,6 +36,7 @@
 namespace archlinuxinstaller {
 
 const std::string PackageInstaller::DEFAULT_AUR_URL = "https://aur.archlinux.org/cgit/aur.git/snapshot/%s.tar.gz";
+std::vector<std::function<void(const std::string&)>> PackageInstaller::globalAfterInstall;
 
 PackageInstaller::PackageInstaller() :
 	aurUrl(DEFAULT_AUR_URL), aurUserCreated(false), aurRequirementsInstalled(false)
@@ -61,6 +62,7 @@ std::vector<std::string> PackageInstaller::packagesToInstall(const std::string& 
 
 void PackageInstaller::runAfterInstall(const std::string& packageName) const
 {
+	for(const auto& func : globalAfterInstall) func(packageName);
 	for(const auto& func : afterInstall) func(packageName);
 }
 

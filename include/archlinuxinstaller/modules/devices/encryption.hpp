@@ -50,7 +50,7 @@ public:
 	bool create(const Partition& partition, const std::string& lvmPassphrasePath) const;
 	void fillMountables(std::vector<std::reference_wrapper<const Volume>>& mountables) const;
 
-	bool install(PackageInstaller& packageInstaller, const std::string& grubDevice = "", const std::string& grubDmname = "") const;
+	bool install(const std::string& grubDevice = "", const std::string& grubDmname = "") const;
 };
 
 }}}

@@ -27,24 +27,35 @@ namespace archlinuxinstaller {
 namespace modules {
 namespace settings {
 
-const double Settings::ORDER = 0.2;
+Settings::Settings() : Module("settings", 0.2)
+{
+}
+
+bool Settings::decode(const YAML::Node& node)
+{
+	return YAML::convert<Settings>::decode(node, *this);
+}
 
 bool Settings::runOutsideBefore(const std::function<UIT>& ui)
 {
-	bool status = ui("Setting keyboard", setKeyboard());
-	status &= ui("Setting font", setFont());
+	bool status = true;
+
+	if(keyboard) status &= ui("Setting keyboard (" + *keyboard + ')', setKeyboard());
+	if(font) status &= ui("Setting font", setFont());
 
 	return status;
 }
 
 bool Settings::runInside(const std::function<UIT>& ui)
 {
-	bool status = ui("Setting keyboard", setKeyboard());
-	status &= ui("Setting font", setFont());
-	status &= ui("Setting locales", setLocales());
-	status &= ui("Setting lang", setLang());
-	status &= ui("Setting timezone", setTimezone());
-	status &= ui("Setting hostname", setHostname());
+	bool status = true;
+
+	if(keyboard) status &= ui("Setting keyboard", setKeyboard(true));
+	if(font) status &= ui("Setting font", setFont(true));
+	if(!locales.empty()) status &= ui("Setting locales", setLocales());
+	if(lang) status &= ui("Setting lang", setLang());
+	if(timezone) status &= ui("Setting timezone", setTimezone());
+	if(hostname) status &= ui("Setting hostname", setHostname());
 
 	return status;
 }
@@ -102,19 +113,21 @@ bool Settings::setLang() const
 
 bool Settings::setTimezone() const
 {
-	return utils::SystemUtils::system("ln -s /usr/share/zoneinfo/" + *timezone + " /etc/localtime");
+	if(timezone) return utils::SystemUtils::system("ln -s /usr/share/zoneinfo/" + *timezone + " /etc/localtime");
+	return true;
 }
 
 bool Settings::setHostname() const
 {
-	return utils::SystemUtils::system("echo " + *hostname + " > /etc/hostname");
+	if(hostname) return utils::SystemUtils::system("echo " + *hostname + " > /etc/hostname");
+	return true;
 }
 
 }}}
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::modules::settings::Settings>::decode(Node node, archlinuxinstaller::modules::settings::Settings& settings)
+bool convert<archlinuxinstaller::modules::settings::Settings>::decode(const Node& node, archlinuxinstaller::modules::settings::Settings& settings)
 {
 	if(node.IsMap())
 	{

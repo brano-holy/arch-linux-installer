@@ -21,19 +21,22 @@
 
 #include "archlinuxinstaller/modules/devices/sshdecrypt.hpp"
 
+#include "archlinuxinstaller/packageinstaller.hpp"
+
 #include "archlinuxinstaller/configuration/config.hpp"
 
 namespace archlinuxinstaller {
 namespace modules {
 namespace devices {
 
-bool SshDecrypt::install(PackageInstaller& packageInstaller, const std::string& grubDevice, const std::string& grubDmname) const
+bool SshDecrypt::install(const std::string& grubDevice, const std::string& grubDmname) const
 {
 	std::vector<std::string> sshDecryptPackages;
 	sshDecryptPackages.emplace_back("mkinitcpio-" + network);
 	sshDecryptPackages.emplace_back("mkinitcpio-" + sshServer);
 	sshDecryptPackages.emplace_back("mkinitcpio-utils");
 
+	PackageInstaller packageInstaller;
 	bool status = packageInstaller.installAurPackages(sshDecryptPackages);
 
 	if(packageInstaller.isInstalled("mkinitcpio"))

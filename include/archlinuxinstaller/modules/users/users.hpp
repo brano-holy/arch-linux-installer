@@ -36,9 +36,9 @@ protected:
 	virtual void addUserInputs(std::vector<UserInputBase*>& userInputs) const;
 
 public:
-	static const double ORDER;
+	Users();
 
-	virtual inline double getOrder() const { return ORDER; }
+	virtual bool decode(const YAML::Node& node);
 
 	virtual bool runInside(const std::function<UIT>& ui);
 	virtual bool runOutsideAfter(const std::map<std::string, UserInputBase*>& userInputs, const std::function<UIT>& ui);
@@ -53,7 +53,7 @@ namespace YAML {
 template<>
 struct convert<archlinuxinstaller::modules::users::Users>
 {
-	static bool decode(Node node, archlinuxinstaller::modules::users::Users& users);
+	static bool decode(const Node& node, archlinuxinstaller::modules::users::Users& users);
 };
 
 }

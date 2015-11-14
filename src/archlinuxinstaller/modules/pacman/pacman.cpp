@@ -28,24 +28,41 @@ namespace archlinuxinstaller {
 namespace modules {
 namespace pacman {
 
-const double Pacman::ORDER = 0.22;
+Pacman::Pacman() : Module("pacman", 0.22)
+{
+}
+
+bool Pacman::decode(const YAML::Node& node)
+{
+	return YAML::convert<Pacman>::decode(node, *this);
+}
 
 bool Pacman::runInside(const std::function<UIT>& ui)
 {
 	bool status = true;
 
 	PackageInstaller installer;
+	installer.addAfterInstall(std::bind(&Pacman::afterInstall, this, std::placeholders::_1));
+
 	if(!packages.empty()) status &= ui("Installing packages", installer.installPackages(packages));
 	if(!aurPackages.empty()) status &= ui("Installing AUR packages", installer.installAurPackages(aurPackages));
 
 	return status;
 }
 
+void Pacman::afterInstall(const std::string& packageName)
+{
+	if(packageName == "sudo")
+	{
+		utils::SystemUtils::csystem("echo \"%wheel ALL=(ALL) ALL\" > /etc/sudoers.d/99-wheel");
+	}
+}
+
 }}}
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::modules::pacman::Pacman>::decode(Node node, archlinuxinstaller::modules::pacman::Pacman& pacman)
+bool convert<archlinuxinstaller::modules::pacman::Pacman>::decode(const Node& node, archlinuxinstaller::modules::pacman::Pacman& pacman)
 {
 	if(node["packages"]) pacman.packages = node["packages"].as<std::vector<std::string>>();
 	if(node["aurPackages"]) pacman.aurPackages = node["aurPackages"].as<std::vector<std::string>>();

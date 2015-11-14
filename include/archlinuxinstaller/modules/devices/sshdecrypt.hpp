@@ -26,8 +26,6 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "archlinuxinstaller/packageinstaller.hpp"
-
 namespace archlinuxinstaller {
 namespace modules {
 namespace devices {
@@ -40,7 +38,7 @@ public:
 	std::string sshServer;
 	std::vector<std::string> authorizedKeys;
 
-	bool install(PackageInstaller& packageInstaller, const std::string& grubDevice = "", const std::string& grubDmname = "") const;
+	bool install(const std::string& grubDevice = "", const std::string& grubDmname = "") const;
 };
 
 }}}

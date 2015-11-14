@@ -31,7 +31,14 @@ namespace archlinuxinstaller {
 namespace modules {
 namespace devices {
 
-const double Devices::ORDER = 0.1;
+Devices::Devices() : Module("devices", 0.1, true)
+{
+}
+
+bool Devices::decode(const YAML::Node& node)
+{
+	return YAML::convert<Devices>::decode(node, *this);
+}
 
 void Devices::addUserInputs(std::vector<UserInputBase*>& userInputs)
 {
@@ -60,6 +67,20 @@ bool Devices::runOutside(const std::map<std::string, UserInputBase*>& userInputs
 	status &= ui("Mounting partitions", mountPartitions());
 
 	return status;
+}
+
+bool Devices::runInside(const std::function<UIT>& ui)
+{
+	if(hasEncryption())
+	{
+		const Encryption* encryption = getEncryption();
+		std::string grubDevice, grubDmname;
+		getGrubParams(grubDevice, grubDmname);
+
+		return ui("Installing encryption", encryption->install(grubDevice, grubDmname));
+	}
+
+	return true;
 }
 
 bool Devices::hasEncryption() const
@@ -150,7 +171,7 @@ bool Devices::mountPartitions() const
 
 namespace YAML {
 
-bool convert<archlinuxinstaller::modules::devices::Devices>::decode(Node node, archlinuxinstaller::modules::devices::Devices& devices)
+bool convert<archlinuxinstaller::modules::devices::Devices>::decode(const Node& node, archlinuxinstaller::modules::devices::Devices& devices)
 {
 	if(node.IsSequence())
 	{
